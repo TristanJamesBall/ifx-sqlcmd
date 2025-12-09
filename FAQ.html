@@ -1,0 +1,770 @@
+<html>
+<head>
+<title> FAQs for SQLCMD </title>
+</head>
+<body>
+<h1 align="CENTER"> FAQs for SQLCMD </h1>
+
+<p>
+This is a preliminary set of answers to some frequently asked questions about
+the SQLCMD suite of tools.
+
+<p>
+This version is for SQLCMD Version 90.02 (2016-07-28).
+</p>
+
+<p>
+<ul>
+<li> <a href="#what_is_sqlcmd?"> What is SQLCMD? </a> </li>
+<li> <a href="#download_compilation_installation"> Download, Compilation and Installation </a> </li>
+<li> <a href="#using_sqlcmd"> Using SQLCMD </a> </li>
+<li> <a href="#load_syntax"> Extended LOAD Syntax </a> </li>
+<li> <a href="#reload_syntax"> RELOAD Syntax </a> </li>
+<li> <a href="#unload_syntax"> Extended LOAD Syntax </a> </li>
+<li> <a href="#using_sqlupload"> Using SQLUPLOAD </a> </li>
+<li> <a href="#using_updblob"> Using UPDBLOB and Relatives</a> </li>
+<li> <a href="#using_mkproc"> Using MKPROC </a> </li>
+<li> <a href="#using_sqlserver_sqlclient_newserver"> Using SQLSERVER, SQLCLIENT, NEWSERVER </a> </li>
+<li> <a href="#known_bugs"> Known Bugs </a> </li>
+<li> <a href="#art_kagels_tools"> Art Kagel's Tools </a> </li>
+<li> <a href="#other_related_tools"> Other Related Tools </a> </li>
+</ul>
+
+<hr>
+<a name="what_is_sqlcmd"></a>
+<h2> What is SQLCMD? </h2>
+
+<ol>
+
+<li>
+SQLCMD is an SQL Command Interpreter for
+<a href="http://www.informix.com"> Informix </a> databases.
+It is analogous to the Query-Language option of DB-Access or ISQL,
+but it is designed to work better in shell scripts.
+It has a number of features not available in DB-Access.
+The only advantage DB-Access has over SQLCMD is the screen-mode
+(curses-based) interface.
+On the other hand, one of SQLCMD's principal advantages is precisely
+that it is not constrained by a curses-based interface.
+
+<li>
+SQLCMD is written in ESQL/C.  It works with any version of ESQL/C
+from 5.00 (circa 1990) upwards.
+
+<li>
+SQLCMD has a history mechanism that allows you to review, edit and
+rerun commands you ran previously.
+
+<li>
+SQLCMD will use the GNU readline library if it is installed on your
+machine.
+This allows you to edit the command you are typing, or to find
+commands you ran previously and rerun them, possibly after editing them.
+
+</ol>
+
+<hr>
+<a name="download_compilation_installation"></a>
+<h2> Download, Compilation and Installation </h2>
+
+<ol>
+
+<li>
+The primary download site for SQLCMD is the Informix International
+User Group software archive at <a href="http://www.iiug.org/">
+http://www.iiug.org </a>.
+It is distributed as a gzipped tar file with the extension ".tgz".
+It is currently 400 kilobytes in the compressed format.
+When compiled, it uses about 2.5 megabytes.  When installed, it needs
+about 400 kilobytes.
+
+<li>
+Because SQLCMD is written in ESQL/C, you must have ESQL/C or ClientSDK
+on your machine before installing SQLCMD.
+You can, if desparate, use compiled I4GL instead; specify ESQL=c4gl
+on the command line to make.
+You may have problems with autoconf if you use I4GL.
+
+<li>
+The README file contains the current directions for compiling and
+installing SQLCMD.
+
+<li>
+On Unix systems (including Linux), the normal sequence of events is:
+<ul>
+<li> ./configure
+<li> make
+<li> make install
+</ul>
+
+<li>
+On NT systems, the normal sequence of events is:
+<ul>
+<li> ./configure
+<li> make
+<li> make install
+</ul>
+However, this runs a BAT file that copies some pre-configured files
+into the working directory.  You will probably need to modify these.
+You may also need to fix the const-incorrectness of the CSDK header
+files &#151; or relax the  compilation warning flags /W3 /WX from
+esqlc.mk.
+
+<li>
+If the autoconfigure script detects the GNU readline library but the main
+compilation fails because it cannot find the readline/readline.h header, then
+you will have to tell make where to find the headers by specifying the
+directory on the command line.
+For example, if the GNU readline library is in /usr/gnu/lib/libreadline.so, the
+header would usually be /usr/gnu/include/readline/readline.h.
+The compiler might locate the library because LD_LIBRARY_PATH mentions
+/usr/gnu/lib, but the compiler probably would not search in /usr/gnu/include.
+You should work around this by specifying CPPFLAGS=-I/usr/gnu/include and
+LDFLAGS=-L/usr/gnu/lib in the environment; these values will be added to the
+Makefile automatically.
+If you've already run configure, you can also fix this by using:
+<p> <pre>
+    make UFLAGS=-I/usr/gnu/include
+</pre> </p>
+<p>
+The UFLAGS macro is used when a compiler is run, but it is never defined by the
+SQLCMD system; it is reserved for the user.
+</p>
+
+<li>
+Note that the configure script will pick up some of your environment
+variables and use them.
+These include PATH, CFLAGS, CPPFLAGS, LIBS (amongst others).
+If you have CFLAGS, CPPFLAGS or LIBS set to some value for some other
+part of your work, and you have any problems building SQLCMD, please
+reset them to empty before trying to build SQLCMD.
+
+<li>
+If you are building with a 64-bit version of ESQL/C and your C compiler
+needs a special flag to make it do 64-bit compilations, then the best
+way manage this is to run the configure script with the CC environment
+variable set to the compiler of choice plus the necessary flags.
+For example, on Solaris 8, the Sun (Forte) C compiler needs '-xarch=v9'
+and the GNU C Compiler needs '-m64'.
+Hence either of these commands configures SQLCMD correctly:
+<p> <pre>
+    CC="gcc -m64" ./configure
+    CC="cc -xarch=v9" ./configure
+</pre> </p>
+<p>
+Would that that were all!
+Well, if you're using the Sun C compiler, then that is all, but if
+you're using GCC, you have to do some more work.
+On Solaris 8, the 'esql' script automatically adds '-xarch=v9' which GCC
+complains about.
+So, you have to copy $INFORMIXDIR/bin/esql to the build directory, and
+modify the lines which add '-xarch=v9' after INFORMIXC and other related
+environment variables.
+<p> <pre>
+    sed -e 's/ -xarch=v9/" ; #&amp;/' $INFORMIXDIR/bin/esql > esql
+    chmod +x esql
+</pre> </p>
+<p>
+This neuters all the material from '-xarch=v9' onwards, converting it
+into a comment.
+Thus, the input line:
+</p>
+<p> <pre>
+    CC="${INFORMIXC=cc} -xarch=v9"
+</pre></p>
+becomes:
+<p> <pre>
+    CC="${INFORMIXC=cc}" ; # -xarch=v9"
+</pre></p>
+<p>
+It relies on the assignments using double quotes.
+</p>
+<p>
+Note that you need to be sure you have a version of GCC that is capable
+of 64-bit compilation; this would include the later GCC v3.x versions
+(possibly all of them, but the earliest version of GCC I have
+immediately on hand is v3.4.2), and GCC 4.x; it does not include GCC
+2.9x or earlier versions, in general.
+</p>
+
+<li>
+If you want to make a binary-only distribution of SQLCMD that can be
+distributed to many machines (complete with install script), use:
+<p> <pre>
+    make BOD
+</pre> </p>
+<p>
+This creates a sub-directory BOD with the files that are needed to install
+the software.  You can tar this directory for distribution.  To install it
+on another machine, extract the material into a temporary directory and
+cd into that directory.  If you are logged in as root with the Informix
+environment set and you want to install the software under $INFORMIXDIR,
+all you need to type is:
+<p> <pre>
+    jlss install sqlcmd
+</pre> </p>
+<p>
+This will install some files in $INFORMIXDIR/bin, $INFORMIXDIR/etc and
+$INFORMIXDIR/man/man1, and they will all be owned by user informix and
+belong to user informix.
+<p>
+To vary these, specify the owner, group and directory as options:
+<p> <pre>
+    jlss -o owner -g group -d /directory install sqlcmd
+</pre> </p>
+<p>
+Note that other JLSS commands may be installed using the jlss command.
+Also note that it detects whether there is already a version of SQLCMD
+installed in your chosen location and if there is, verifies that it
+should continue to overwrite it.
+
+<li>
+Note that the install processes (both make install and make BOD)
+install all the executables, but you may not want to install MKPROC,
+UPDBLOB, or the SQLSERVER, SQLCLIENT, NEWSERVER family of programs.
+If that's the case, you need to edit the files list (sqlcmd.lst) for
+the BOD mechanism, or modify the install rule in the Makefile.
+
+<li>
+Depending on your operating system, you may or may not be able to use
+the man command to find the man pages for SQLCMD.
+Usually, you only need to add $INFORMIXDIR/man to the list of
+directories in $MANPATH.
+However, there may be more work to do on some systems.
+One option is to manually install the files in the system manual pages
+directory (often /usr/man).
+You will have more problems if your system does not have nroff
+available for formatting the pages.
+However, the HTML version of the pages should be usable by most people
+these days.
+
+</ol>
+
+
+<hr>
+<a name="using_sqlcmd"></a>
+<h2> Using SQLCMD </h2>
+
+There is a manual page, sqlcmd.1, written in traditional troff/nroff for
+SQLCMD and its link-names, SQLUNLOAD and SQLRELOAD.
+<!-- There is now an HTML version of this file too. -->
+
+<p>
+The most important thing about using SQLCMD is to know that it
+looks at both its argument list and the name by which it is
+invoked to decide what it is supposed to do.
+It is normally installed as three links to a single executable,
+with the names sqlcmd, sqlreload and sqlunload.
+There are three mutually exclusive arguments, -C, -U, -R, which
+control the mode of operation.
+The -C option defines SQLCMD mode, the -U option defines
+SQLUNLOAD mode, and the -R option defines SQLRELOAD mode.
+If none of these options is present, the command looks at the
+basename of its zeroth argument.
+If this is sqlreload, it runs in SQLRELOAD mode; if it is
+sqlunload, it runs in SQLUNLOAD mode; and otherwise it runs in
+SQLCMD mode.
+There are options which apply to SQLUNLOAD and SQLRELOAD that do
+not work for SQLCMD, and vice versa.
+
+<hr>
+<a name="load_syntax"></a>
+<h2> Extended LOAD Syntax </h2>
+
+SQLCMD supports an extended syntax for the LOAD, UNLOAD (and RELOAD)
+statements compared with DB-Access or ISQL.
+The SQLCMD syntax preserves the DB-Access syntax of LOAD and
+UNLOAD as a strict subset of the SQLCMD syntax.
+That is, what works in DB-Access will work in SQLCMD; many things that
+work in SQLCMD will not work in DB-Access.
+
+<p>
+Note that there are likely to be further extensions to the SQLCMD
+syntax over time.
+
+<p>
+<pre>
+    LOAD FROM [PIPE|FILE] "file-or-command" [options...] INSERT INTO Table [(Col1, Col2, ...)]
+</pre>
+
+<p>
+The options are:
+<p>
+<pre>
+    [DELIMITER 'delim']
+    [QUOTE 'quote']
+    [ESCAPE 'escape']
+    [FORMAT 'fmt']
+    [SKIP number]
+</pre>
+<p>
+You cannot use XML format for loading.
+
+<hr>
+<a name="reload_syntax"></a>
+<h2> RELOAD Syntax </h2>
+
+The RELOAD statement is unique to SQLCMD.
+It is syntactically the same as the LOAD statement, but implies
+automatic transaction management.
+In particular, it means that (if needed), records are inserted in
+discrete transactions whose size is controlled by the transaction size.
+If you've already started an explicit transaction in a regular Informix
+logged database, or done some work in a MODE ANSI database, then the
+attempt to open the transaction will fail (invisibly), and the RELOAD
+statement behaves the same as the LOAD statement.
+
+<p>
+<pre>
+    RELOAD FROM [PIPE|FILE] "file-or-command" [options...] INSERT INTO Table [(Col1, Col2, ...)]
+</pre>
+
+<p>
+The options are:
+<p>
+<pre>
+    [DELIMITER 'delim']
+    [QUOTE 'quote']
+    [ESCAPE 'escape']
+    [FORMAT 'fmt']
+    [SKIP number]
+</pre>
+<p>
+You cannot use XML format for loading.
+
+<hr>
+<a name="unload_syntax"></a>
+<h2> Extended LOAD Syntax </h2>
+
+The UNLOAD statement supports a number of extra options compared with
+DB-Access.
+The DB-Access or ISQL syntax is a strict subset of the SQLCMD syntax.
+
+<p>
+<pre>
+UNLOAD [CREATE|APPEND] [TO] [FILE] 'filename' [options] {SELECT ... | EXECUTE [FUNCTION|PROCEDURE] ...}
+
+UNLOAD [TO] PIPE 'pipecommand' [options] {SELECT ... | EXECUTE [FUNCTION|PROCEDURE] ...}
+</pre>
+
+<p>
+The options are:
+<p>
+<pre>
+    [DELIMITER 'delim']
+    [QUOTE 'quote']
+    [ESCAPE 'escape']
+    [FORMAT 'fmt']
+    [RECORDTAG 'tag']
+</pre>
+
+<hr>
+<a name="using_sqlunload"></a>
+<h2> Using SQLUNLOAD </h2>
+
+SQLUNLOAD is an alternative name for SQLCMD; the installation makes a
+(hard rather than symbolic) link between 'sqlcmd' and 'sqlunload'.  At
+run-time, the program looks at the basename of the command name and
+decides whether it is run as sqlunload and acts accordingly.  However,
+you can designate the SQLUNLOAD behaviour with 'sqlcmd -U', and you can
+designate the SQLCMD behaviour with 'sqlunload -C'.
+
+<p>
+Succinctly, you unload a complete table by simply specifying:
+
+<p>
+<pre>
+    sqlunload -d database -t tablename [-o outputfile] [-O col1,col2,...]
+</pre>
+
+<p>
+If you do not specify the output file, then the output goes to standard
+output.
+You can use most of the other SQLCMD options to control the output
+format.
+If you want to specify the subset of the table to be unloaded, use the
+regular SQLCMD options, either with an UNLOAD statement or with the -F
+unload option on the command line and -e 'SELECT statement'.
+
+<p>
+The `-O' option orders the output data based on the column names given.
+There is no direct provision for handling column names that contain
+spaces, commas and so on; what you supply after the `-O' is appended to
+the statement as the `ORDER BY' clause.
+
+<hr>
+<a name="using_sqlreload"></a>
+<h2> Using SQLRELOAD </h2>
+
+SQLRELOAD is an alternative name for SQLCMD; the installation makes a
+(hard rather than symbolic) link between 'sqlcmd' and 'sqlreload'.  At
+run-time, the program looks at the basename of the command name and
+decides whether it is run as sqlreload and acts accordingly.  However,
+you can designate the SQLRELOAD behaviour with 'sqlcmd -R', and you can
+designate the SQLCMD behaviour with 'sqlreload -C'.
+
+<p>
+Succinctly, you reload a complete table by simply specifying:
+
+<p>
+<pre>
+    sqlreload -d database -t tablename [-i inputfile] [-S skip]
+</pre>
+
+<p>
+If you do not specify the input file, then the input comes from standard
+input.
+You can use most of the other SQLCMD options to specify the input
+format.
+If you want to load a subset of the columns in the table, use the
+regular SQLCMD options with a LOAD statement.
+If you specify the '-S skip' option, the first records in the file are
+skipped instead of being loaded.
+If you need the data loaded in a single transaction, set the transaction
+size bigger than the number of rows in the loaded data with '-N size'.
+You can't make it bigger than 2,147,483,647, but if you need to load
+that many rows, you probably don't want it all in a single transaction.
+
+<hr>
+<a name="using_sqlupload"></a>
+<h2> Using SQLUPLOAD </h2>
+
+Information not yet supplied.
+
+<hr>
+<a name="using_updblob"></a>
+<h2> Using UPDBLOB and Relatives </h2>
+
+The UPDBLOB command and its relatives are primarily exercises in programming with blobs.
+They are also usable, albeit somewhat restricted, tools.
+
+<h3> UPDBLOB </h3>
+<p>
+The UPDBLOB command is used to replace a single blob value with a new value from a file.
+
+<p>
+<pre>
+updblob [-Vnx] -d dbase [-u username -p password] -t table -c blobcolumn -k column=value [-k col=val ...] [-f] blobfile
+</pre>
+
+<p>
+This connects to the database (optionally with the user name and
+password specified).
+It updates a row in the table specified in the `-t' option, changing the
+blob in the column by the `-c' option.
+The row(s) are identified by the key specified with the `-k' options.
+The new blob value is contained in the file identified by the `-f'
+option, or by the (sole) trailing argument.
+The `-V' option gives version information; the `-x' option shows the SQL
+that is executed; the `-n' option shows the SQL that would be executed
+without actually executing it.
+
+<p>
+If you specify a non-unique key that identifies multiple rows, multiple
+rows will be updated.
+
+<p>
+Improvement - update multiple columns by permitting multiple instances of:
+<p>
+<pre>
+-c blobcol=blobfile
+</pre>
+<p>
+This is left as an exercise for the reader.
+
+<h3> SELBLOB </h3>
+<p>
+The SELBLOB command selects a single blob value into the named file.
+Unlike UPDBLOB, it only works on one row, the first row that is returned.
+
+<p>
+<pre>
+Usage: selblob [-Vnx] -d dbase [-u username -p password] -t table -c blobcolumn -k column=value [-k col=val ...] [-f] blobfile
+</pre>
+
+<p>
+The options are substantially the same as for UPDBLOB (see above),
+except that the file name specifies where the extracted blob is to be
+stored.
+
+<h3> APPBLOB </h3>
+<p>
+The APPBLOB command is a specialized variant of UPDBLOB; it appends the
+contents of the file to the existing blob in the database.
+This involves selecting the old value, appending the extra information,
+and then updating the blob.
+
+<p>
+Beware that if the update operates on many rows because the key value
+does not identify a single row, then the first selected blob has the new
+data appended to it and all the updated blobs get the (same) new value,
+regardless of what was in them before.
+Fixing this is left as an exercise for the reader (it is trivial if the
+database has transactions; it is non-trivial if it does not).
+
+<p>
+<pre>
+Usage: appblob [-Vnx] -d dbase [-u username -p password] -t table -c blobcolumn -k column=value [-k col=val ...] [-f] blobfile
+</pre>
+
+<h3> INSBLOB </h3>
+<p>
+The INSBLOB command inserts a complete row of data, including blob values from file, into the database.
+Any columns not specified will acquire default values (typically, but not necessarily, NULL).
+If a column is omitted but requires a non-null value and no default is specified, the insert will fail.
+
+<p>
+<pre>
+Usage: insblob [-Vnx] -d dbase [-u username -p password] -t table -b blobcol=file [-b blobcol=file ...] -c col=val [-c col=val ...]
+</pre>
+
+<h3> SELMULTIBLOB </h3>
+<p>
+The SELMULTIBLOB command is a programming exercise preparatory to the
+incomplete feature of allowing blobs to be unloaded to files separate
+from the main UNLOAD file.
+
+<p>
+<pre>
+Usage: selmultiblob [-Vnx] -d dbase [-u username -p password] -t table -c blobcolumn [-c blobcol ...] [-w whereclause] [-D dir]
+</pre>
+
+<p>
+Many of the options are the same as in the other commands.
+The `-w' option accepts the text of a WHERE clause (the program provides
+the keyword WHERE).
+The `-D' option specifies the directory where the blob files are
+unloaded to (default is the current directory).
+
+<hr>
+<a name="using_mkproc"></a>
+<h2> Using MKPROC </h2>
+
+The MKPROC command illustrates (approximately) the simplest plausible SQL
+command interpreter that can be written using ESQL/C.  It exploits the
+CREATE PROCEDURE FROM statement which (contrary to what the manuals imply)
+is capable of executing almost any sequence of SQL commands.  The caveats
+are:
+<ul>
+<li>
+The commands should not return any data (no SELECT statements other
+than SELECT INTO TEMP nor EXECUTE PROCEDURE where the procedure
+returns values).
+<li>
+The commands should not try to specify a database (CREATE DATABASE,
+etc).
+</ul>
+
+<hr>
+<a name="using_sqlserver_sqlclient_newserver"></a>
+<h2> Using SQLSERVER, SQLCLIENT, NEWSERVER </h2>
+
+<hr>
+<a name="known_bugs"></a>
+<h2> Known Bugs </h2>
+
+<ol>
+
+<li>
+The primary feature omission bug is that it does not reliably handle
+all the IUS data types.
+It does now handle the built in ones such as LVARCHAR, BOOLEAN,
+SERIAL8 and INT8.
+Also, as of version 84.00, it supports BIGINT and BIGSERIAL (if the CSDK
+does - that requires CSDK 3.50 or later), which are true 8-byte types
+rather than the 10-byte types represented by INT8 and SERIAL8.
+However, it does not handle user-defined types (UDTs), whether these be
+collections (SET, MULTISET, LIST) or ROW types or DISTINCT types or
+OPAQUE types.
+The expectation is that the majority of these will be handled by
+requesting the database to export them as LVARCHAR.
+
+<li>
+A minor feature omission bug is that the code does not handle ASCII NUL
+reliably when the data is fetched from the database.  It is believed that
+SQLCMD (and SQLRELOAD) will reliably insert ASCII NUL via the LOAD command.
+
+<li>
+Having two history mechanisms (GNU readline and SQLCMD's own
+mechanism) is weird.
+It isn't obvious how to deal with this.
+Ideally, we'd probably modify the GNU readline non-persistent history
+mechanism to use the SQLCMD persistent history code, somehow.
+
+<li>
+The interface to the ClientSDK routines got changed (quietly &#151; they did
+not shout this major change in the 9.21 manuals when it occurred).
+This change ostensibly makes it easier to work with 32-bit and 64-bit
+machines.  In practice, it means that every scrap of code has to be
+rewritten to the new standard, with backwards compatibility being preserved
+by defining appropriate types that match the 32-bit interface.  That then
+leaves one or two platforms (DEC Alpha springs to mind) as a major pain
+since the old interface was the 32-bit interface treated as a 64-bit system.
+
+<hr>
+<a name="art_kagels_tools"></a>
+<h2> Art Kagel's Tools </h2>
+
+Art Kagel &lt;kagel@bloomberg.net&gt; has written some useful tools,
+including MYSCHEMA, MYEXPORT and MYIMPORT.
+These are all surrogates for the corresponding Informix tools -
+DB-Schema, DB-Export and DB-Import.
+The latter two use SQLCMD to handle the loading and unloading of the
+data.
+
+These are available from the IIUG Software Archive too under the name
+<b>utils2_ak</b>.
+
+<hr>
+<a name="other_related_tools"></a>
+<h2> Other Related Tools </h2>
+
+There are a number of other tools written by Jonathan Leffler that may
+be helpful to you if you find SQLCMD useful.
+Most of these are available from the <a href="http://www.iiug.org/">
+IIUG Software Archive </a>.
+Any that are not can be obtained by emailing the author, albeit with
+an erratic turnaround time.
+
+The commands include:
+<ul>
+<li>
+DBLDFMT - database load format manipulator.
+Primarily for converting fixed format records into variable width
+records with delimiters, but also capable of converting date/time
+formats (with different input and output formats for each field in the
+record, if necessary), and of inserting implicit decimal points in
+numeric fields, and of adding constant material (eg a zero for a
+SERIAL column).
+
+<br>
+<small><i>
+Note: this should probably be divided into two separate programs,
+one for manipulating fixed format data records and a separate one
+for reformatting date and time fields based on Informix's normal
+input data format.
+</i></small>
+
+<li>
+RECSPLIT - record splitter.
+In some mainframe environments, output data is generated with a fixed
+length record with no delimiter at the end of the record, let alone
+the fields.
+The RECSPLIT command reads such data and inserts a newline separator
+after each fixed length record.
+(The separator is configurable, of course.)
+
+<li>
+FIXLEN - for converting variable length records to a fixed length,
+blank padding short records and truncating long ones.
+
+<li>
+ISAMCHK - check C-ISAM file for validity.  Based on user-defined record
+length, report on how many current, deleted and invalid records are found.
+If the record length is wrong, most records will be deemed invalid.  It
+also lists up to the first 256 record numbers which are invalid records.
+
+<li>
+BLOCKJMP - selectively skip blocks from a file.
+It was designed to recover SE data files from a particular corrupt tape.
+The files contained an initial chunk of OK data, followed by a
+repeating pattern of a chunk of garbage and a chunk of good data.
+The sizes of the repeating chunks were fixed.
+This program extracts the good data and rejects the bad.
+
+<li>
+ISEXTRACT - unload a C-ISAM file.
+Given a specification of the contents of the C-ISAM file, unload it
+into the Informix LOAD format.  This unload process can, optionally,
+include records marked as deleted by C-ISAM.
+
+<li>
+LISTIEM - list the error messages in an Informix error message file.
+Several formats, including a decompiled format suitable for input to
+the mkmessage utility.
+
+<li>
+CHKMSG - list single messages or ranges of error messages.
+Does not require knowledge from the user about which file to search.
+
+<li>
+Esoteric reformatting and tape manipulating routines, including:
+
+<ul>
+
+<li>
+BSPLIT - to split files into semi-manageable chunks of the same size.
+This command is superceded by the POSIX.2 SPLIT utility which includes
+this functionality (eg GNU SPLIT), but it was written before POSIX.2
+(IEEE 1003.2:1992 - ISO/IEC 9945.2:1992) was standardized.
+In those days, the standard SPLIT only worked on lines (which was no
+help when the data files that you were working on contained no newline
+characters).
+
+<li>
+FILLIN, BASIS2IFX and COMBINE - for converting records from a rather
+obscure semi-fixed format to Informix load format.
+The original system was a (MVS or VMS) text retrieval package called
+BASIS.
+The output format consisted of one or more lines per field, with a
+(fixed length) record identifier, a (fixed length) field type number, and
+the variable length text for the field.
+However, if the item text was longer than some limit, then it was
+continued on a second (or subsequent) line, with blanks instead
+of the record identifier and field type number.
+Further, the record identifier was only present on the first line for
+a given record; on subsequent lines, it was a series of blanks.
+
+<p>
+<pre>
+7109           2   860502
+               448 STRUCK SHELL JETTY WHILST MANOEUVERING AT BIRZEBBUGA
+                   T 0730 HOURS ON 18/4/75 AND SUSTAINED CONSIDERABLE
+</pre>
+</p>
+
+<p>
+This shows part of the information for record ID 7109, with field 2
+containing 860502 (probably a date, in fact) and field 448 containing
+some text on two lines (and the text is almost certainly not
+complete).
+A given record might contain almost any combination of different field
+type numbers, in almost any sequence, though without any repeated
+field type numbers.
+Converting this data into coherent Informix LOAD format is rather
+complex, even once you've dealt with weird (variable, multi-character)
+record delimiters, some of which only appear in one chunk of about 256
+kB in the middle of a data file of 60 MB or so.
+
+<li>
+TAPEREAD - which deals with non-Unix tapes where
+there may be multiple files on a single (9-track 0.5 inch) tape with EOF
+markers between those files.
+</ul>
+It is safe to assume that these are not available at the IIUG web site.
+There are also some other even more esoteric programs available by
+software archaeology on this project.
+One routine of some conceivable value is a very restricted variant of
+SED which is capable of mapping 20,000 variant spellings concurrently
+(albeit not very efficiently).
+This was in the days when the standard issue of SED would fail if
+there were more than 100 commands in its list of commands, and piping
+the data through 200 copies of SED was not an option.
+
+</ul>
+
+<hr>
+Copyright &copy;
+2000-02,2004-05
+Jonathan Leffler
+<hr>
+Last Updated:
+Wednesday 23rd February 2005
+
+<p>
+Please send comments, additions, amendments, questions to
+<a href="mailto:j.leffler@acm.org"> Jonathan Leffler </a>
+
+<!-- @(#)$Id: FAQ.html,v 2008.1 2008/03/10 00:42:42 jleffler Exp $ -->
+</body>
+</html>

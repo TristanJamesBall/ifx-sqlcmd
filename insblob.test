@@ -1,0 +1,54 @@
+#!/bin/sh
+#
+# @(#)$Id: insblob.test,v 1.1 2002/11/22 00:15:01 jleffler Exp $
+#
+# Skeletal test for INSBLOB program (assumes SQLCMD is available too)
+
+: ${DBASE:=stores}
+: ${TABLE:=table}
+
+./insblob													# Usage
+./insblob -V												# OK: Version
+./insblob -d												# No argument for -d
+./insblob -d $DBASE											# Usage
+./insblob -d $DBASE -t										# No argument for -t
+./insblob -d $DBASE -t $TABLE								# Usage
+./insblob -d $DBASE -t $TABLE -b 							# No argument for -b
+./insblob -d $DBASE -t $TABLE -b b1							# No '='
+./insblob -d $DBASE -t $TABLE -b b1=file					# No regular columns
+./insblob -d $DBASE -t $TABLE -b b1=file -c					# No argument for -c
+./insblob -d $DBASE -t $TABLE -b b1=file -c c1				# No '='
+./insblob -d $DBASE -t $TABLE -b b1=file -c c1=val			# No such table/column
+./insblob -x -d $DBASE -t $TABLE -b b1=file -c c1=val		# No such table/column
+./insblob -n -x -d $DBASE -t $TABLE -b b1=file -c c1=value	# OK
+
+cat - >insblob.sql <<EOF
+CREATE TABLE $TABLE
+(
+	c1 CHAR(5) NOT NULL UNIQUE,
+	b1 BYTE IN TABLE,
+	b2 BYTE IN TABLE,
+	t1 TEXT IN TABLE,
+	t2 TEXT IN TABLE,
+	c2 DATETIME YEAR TO SECOND DEFAULT CURRENT YEAR TO SECOND NOT NULL,
+	c3 INTEGER NOT NULL
+);
+EOF
+
+sqlcmd -d $DBASE -f - -f insblob.sql <<EOF
+continue push;
+continue on;
+DROP TABLE $TABLE;
+continue pop;
+EOF
+
+./insblob -n -x -d $DBASE -t $TABLE -b b1=insblob.sql -c c3=12 -c c1=abc	# OK - no execute
+./insblob -x -d $DBASE -t $TABLE -b b1=insblob.sql -c c3=12 -c c1=abc	# OK - execute
+./insblob -x -d $DBASE -t $TABLE -b b1=insblob.sql -c c3=12 -c c1=abc	# XX - dup entry
+./insblob -x -d $DBASE -t $TABLE \
+	-b b1=insblob.sql -b b2=insblob.sql -b t1=insblob.sql -b t2=insblob.sql \
+	-c c3=-12 -c c1=def -c c2="2002-02-02 02:02:02"						# OK - row inserted
+./insblob -x -d $DBASE -t $TABLE -b b1=insblob.sql -b b2=insblob.sql \
+	-c c3=13 -c c1=ghi													# OK - row inserted
+
+sqlcmd -d $DBASE -e "DROP TABLE $TABLE"

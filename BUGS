@@ -1,0 +1,31 @@
+KNOWN BUGS IN SQLCMD Version 90.02 (2016-07-28)
+
+Regrettably, there are some bugs in the SQLCMD suite which have not been
+fully resolved.  These problems should not affect the majority of users,
+but they are are bound to affect some people (if only those who report
+the bugs in the first place).
+
+SQLCMD
+
+2008-07-13:
+    If you make a syntax error in the part of a LOAD statement after the
+    keyword INSERT, then you get a message which identifies the correct
+    file, but suggests the line number is 1.  If you make the mistake
+    earlier, you typically get a line number that's one too large, so an
+    error on line 3 of a file is reported at line 4.  Neither is ideal;
+    neither is catastrophic.
+
+2008-07-14:
+    DB-Access formats money using locale information - SQLCMD does not.
+
+SQLUPLOAD
+
+2005-01-13:
+    There's a problem with managing updates where part of the 'key' data
+    is null.  The code was supposed to manage this, but somewhere along
+    the line, the sqlda structure is getting recreated and losing the
+    null-ness information.
+
+Jonathan Leffler <j.leffler@acm.org>
+
+@(#)$Id: BUGS,v 2008.3 2008/07/15 06:15:04 jleffler Exp $

@@ -1,0 +1,525 @@
+#   @(#)$Id: Makefile.in,v 2015.1 2015/11/09 01:43:55 jleffler Exp $
+#
+#   @(#)@PACKAGE@ Version @VERSION@
+#
+#   (C) Copyright JLSS 1999-2015
+#
+#   Makefile for SQLCMD/SQLUNLOAD/SQLRELOAD
+
+include esqlc.mk
+
+###################################################################
+#                SQLCMD has been AutoConfiscated.                 #
+#       You should not need to manually configure Makefile        #
+###################################################################
+
+###################################################################
+# CONFIGURATION SECTION -- edit in emergency only                 #
+###################################################################
+# Set OFLAGS, XFLAGS, SFLAGS, RANLIB, etc to suit your machine.   #
+# Add malloc.o if using a debugging malloc.  Add -DDEBUG_MALLOC   #
+# to OFLAGS if your malloc package provides a routine             #
+# dump_malloc() to print the current memory usage.  You can       #
+# define -Ddump_malloc=xxyyzz if there is a similar routine to    #
+# dump_malloc (a routine with no arguments and no return value)   #
+# but by a different name.                                        #
+###################################################################
+
+CC		  = gcc -static
+#OFLAGS    = -g -DDEBUG_MALLOC
+OFLAGS    = -O3
+XFLAGS    = -v
+XFLAGS    =
+
+SUFFIX        =
+LN            = @LN_S@
+MKPATH        = mkdir -p
+prefix        = @prefix@
+exec_prefix   = @exec_prefix@
+BINDIR        = @bindir@
+ETCDIR        = @sysconfdir@
+SHAREDIR      = @datarootdir@
+MAN0DIR       = ${SHAREDIR}/man
+MAN1DIR       = ${MAN0DIR}/man1
+INSTALL       = @INSTALL@
+INSTALL_PROG  = @INSTALL_PROGRAM@
+INSTALL_DATA  = @INSTALL_DATA@
+CC            = @CC@
+ESQLC_COMMAND = @ESQLC_COMMAND@
+ESQLC_VERSION = @ESQLC_VERSION@
+ESQLC_VERTEXT = @ESQLC_VERTEXT@
+ESQLC_INCLDIR = @ESQLC_INCLDIR@
+ESQLC_AIXLOCT = @ESQLC_AIXLOCT@
+ESQLC_CCFLAGS = @ESQLC_CCFLAGS@
+INFORMIXDIR   = @INFORMIXDIR@
+HAVE_CONFIG_H = @DEFS@
+RANLIB        = @RANLIB@
+YACC          = @YACC@
+OFILES.o      = @MISSING_OBJECTS@
+LIBREADLINE   = @LIBREADLINE@
+LIBS	      = @LIBS@
+ARFLAGS       = -ruv @ESQLC_AIX_ARFLAGS@
+# If the user sets CPPFLAGS, CFLAGS or LDFLAGS when running configure,
+# we need to use them during the build too.  Beware of placing user's
+# CPPFLAGS ahead of Informix include directories; iODBC provides an
+# sqltypes.h header which conflicts with the Informix variant.  One way
+# around this would use the notation <esql/sqltypes.h>, but that
+# would be a hard transition to make (we tried it, briefly).
+USER_CPPFLAGS = @CPPFLAGS@
+USER_CFLAGS   = @CFLAGS@
+USER_LDFLAGS  = @LDFLAGS@
+
+UFLAGS    = # User flags for C compiler; always overridable on command line
+PFLAGS    = ${HAVE_CONFIG_H} ${ESQLC_AIXLOCT}
+VERSION   = -DESQLC_VERSION=${ESQLC_VERSION}
+INCDIRS   = -I. -I${ESQLC_INCLDIR}
+LIBSQLCMD = libjlss.a
+STRIP     = -s
+AUXLIBS   = # User library names for linker: always overridable on command line
+LDFLAGS   = ${ESQLC_CCFLAGS} ${USER_LDFLAGS} ${STRIP} ${LIBSQLCMD} ${LIBS} ${LIBREADLINE} ${AUXLIBS}
+CFLAGS    = ${UFLAGS} ${VERSION} ${ESQLC_CCFLAGS} ${INCDIRS} ${OFLAGS} ${XFLAGS} \
+			${PFLAGS} ${USER_CPPFLAGS} ${USER_CFLAGS}
+
+###################################################################
+# END OF CONFIGURATION SECTION                                    #
+###################################################################
+
+ESQL_CMD  = ${ESQLC_COMMAND}
+
+CFLAGS_SQLREAD = -DSQLREAD
+
+## On AIX, zapping the .SUFFIXES means that the null suffix rules
+## do not work after the suffix is restored.  So, define our own
+## null suffix rule for making shell scripts.
+
+.sh:
+	${RM} $@; ${CP} $< $@; ${MX} $@
+
+# RM defined in esqlc.mk
+MX         = chmod a+x
+CP         = cp
+MV         = mv
+RM_FR      = rm -fr
+
+# Binaries
+APPBLOB    = appblob${SUFFIX}
+HISTDUMP   = histdump${SUFFIX}
+HISTTEST   = histtest${SUFFIX}
+INSBLOB    = insblob${SUFFIX}
+MKPROC     = mkproc${SUFFIX}
+MULTIBLOB  = selmultiblob${SUFFIX}
+SELBLOB    = selblob${SUFFIX}
+SQLCMD     = sqlcmd${SUFFIX}
+SQLREAD    = sqlread${SUFFIX}
+SQLRELOAD  = sqlreload${SUFFIX}
+SQLUNLOAD  = sqlunload${SUFFIX}
+SQLUPLOAD  = sqlupload${SUFFIX}
+UPDBLOB    = updblob${SUFFIX}
+
+# Scripts
+SQLCLEAN   = sqlclean${SUFFIX}
+SQLCLIENT  = sqlclient${SUFFIX}
+SQLSERVER  = sqlserver${SUFFIX}
+NEWSERVER  = newserver${SUFFIX}
+SQLRESET   = sqlreset${SUFFIX}
+SQL        = sql${SUFFIX}
+
+# Installer, uninstaller (no suffix)
+JLSS       = jlss
+
+GRAMMAR.y  = connecty.y
+GRAMMAR.c  = ${GRAMMAR.y:.y=.c}
+GRAMMAR.o  = ${GRAMMAR.y:.y=.o}
+BACKUPY.c  = ${GRAMMAR.c}.std
+
+.PRECIOUS:	${LIBSQLCMD}
+
+PROGRAMS = \
+		${APPBLOB} \
+		${HISTDUMP} \
+		${HISTTEST} \
+		${INSBLOB} \
+		${MKPROC} \
+		${MULTIBLOB} \
+		${NEWSERVER} \
+		${SELBLOB} \
+		${SQLCLEAN} \
+		${SQLCLIENT} \
+		${SQLCMD} \
+		${SQLREAD} \
+		${SQLRELOAD} \
+		${SQLSERVER} \
+		${SQLUNLOAD} \
+		${SQLUPLOAD} \
+		${UPDBLOB}
+
+SQLCMD.o = \
+		connect.o \
+		${GRAMMAR.o} \
+		sqlcmd.o \
+		sqlinfo.o \
+		sqlver.o
+
+SQLREAD.o = \
+		connect.o \
+		${GRAMMAR.o} \
+		sqlinfo.o \
+		sqlread.o \
+		sqlread-internal.o \
+		sqlread-sqlstmt.o \
+		sqlver.o
+
+SQLUPLOAD.o = \
+		guesser.o \
+		sqlupload.o \
+		upload.o \
+		usesqlda.o
+
+APPBLOB.o   = appblob.o connblob.o
+HISTDUMP.o  = histdump.o
+HISTTEST.o  = histtest.o
+INSBLOB.o   = insblob.o connblob.o
+MKPROC.o    = mkproc.o
+MULTIBLOB.o = selmultiblob.o connblob.o
+SELBLOB.o   = selblob.o connblob.o
+UPDBLOB.o   = updblob.o connblob.o
+
+LIBSQLCMD.o = \
+		${OFILES.o} \
+		basedigit.o \
+		basename.o \
+		chkfifo.o \
+		chktty.o \
+		chrcstrlit.o \
+		cistrcmp.o \
+		conninfo.o \
+		context.o \
+		cstrlitchr.o \
+		cstrlitstr.o \
+		datefmt.o \
+		debug.o \
+		decfix.o \
+		decsci.o \
+		decsetexp.o \
+		describe.o \
+		dumpblob.o \
+		dumpdec.o \
+		dumpdtime.o \
+		dumpindent.o \
+		dumpintvl.o \
+		dumpsqlca.o \
+		dumpsqlda.o \
+		dumpvalue.o \
+		efopen.o \
+		emalloc.o \
+		epopen.o \
+		errhelp.o \
+		esnprintf.o \
+		esqlcver.o \
+		esqlver.o \
+		estrdup.o \
+		fcopy.o \
+		filelock.o \
+		fmkstemp.o \
+		getline.o \
+		getopt.o \
+		getsubopt.o \
+		history.o \
+		ifmxdec.o \
+		ilog10.o \
+		internal.o \
+		iustoken.o \
+		ixblob.o \
+		jtypes.o \
+		kludge.o \
+		lduint4.o \
+		memory.o \
+		mkpath.o \
+		nstrcpy.o \
+		nvstrcpy.o \
+		openfile.o \
+		output.o \
+		quotify.o \
+		readcmd.o \
+		readload.o \
+		reload.o \
+		scribble.o \
+		skip.o \
+		sqlconn.o \
+		sqlerr.o \
+		sqlownobj.o \
+		sqlprint.o \
+		sqlquote.o \
+		sqlsignal.o \
+		sqlstmt.o \
+		sqltoken.o \
+		sqltype.o \
+		sqlunquote.o \
+		stderr.o \
+		strcstrlit.o \
+		strdotfill.o \
+		strlower.o \
+		strprefix.o \
+		strupper.o \
+		stuint4.o \
+		timer.o \
+		tokencmp.o \
+		usesqlda.o \
+		vstrcpy.o
+
+FILES.c = \
+		basedigit.c \
+		basename.c \
+		chkfifo.c \
+		chktty.c \
+		chrcstrlit.c \
+		cistrcmp.c \
+		conninfo.c \
+		context.c \
+		cstrlitchr.c \
+		cstrlitstr.c \
+		datefmt.c \
+		debug.c \
+		decfix.c \
+		decsci.c \
+		decsetexp.c \
+		dumpindent.c \
+		efopen.c \
+		emalloc.c \
+		epopen.c \
+		errhelp.c \
+		esnprintf.c \
+		esqlver.c \
+		estrdup.c \
+		fcopy.c \
+		filelock.c \
+		fmkstemp.c \
+		getline.c \
+		getopt.c \
+		getsubopt.c \
+		guesser.c \
+		histdump.c \
+		history.c \
+		ifmxdec.c \
+		ilog10.c \
+		internal.c \
+		iustoken.c \
+		jtypes.c \
+		kludge.c \
+		lduint4.c \
+		memory.c \
+		mkpath.c \
+		nstrcpy.c \
+		nvstrcpy.c \
+		output.c \
+		quotify.c \
+		readcmd.c \
+		readload.c \
+		scribble.c \
+		skip.c \
+		sqlcmd.c \
+		sqlerr.c \
+		sqlprint.c \
+		sqlquote.c \
+		sqlsignal.c \
+		sqltoken.c \
+		sqlunquote.c \
+		sqlupload.c \
+		sqlver.c \
+		stderr.c \
+		strcstrlit.c \
+		strlower.c \
+		strprefix.c \
+		strupper.c \
+		stuint4.c \
+		timer.c \
+		tokencmp.c \
+		usesqlda.c \
+		vstrcpy.c
+
+FILES.ec = \
+		connect.ec \
+		describe.ec \
+		dumpblob.ec \
+		dumpdec.ec \
+		dumpdtime.ec \
+		dumpintvl.ec \
+		dumpsqlca.ec \
+		dumpsqlda.ec \
+		dumpvalue.ec \
+		esqlcver.ec \
+		ixblob.ec \
+		mkproc.ec \
+		reload.ec \
+		sqlconn.ec \
+		sqlinfo.ec \
+		sqlownobj.ec \
+		sqlstmt.ec \
+		sqltype.ec \
+		updblob.ec \
+		upload.ec
+
+all:	${PROGRAMS}
+	-ls -il ${PROGRAMS} 2>/dev/null
+
+${LIBSQLCMD}:	${LIBSQLCMD.o}
+	${AR} ${ARFLAGS} $@ $?
+	${RANLIB} $@
+
+${SQLCMD}:	${SQLCMD.o} ${LIBSQLCMD}
+	${ESQL} -o $@ ${SQLCMD.o} ${LDFLAGS} ${LIBS}
+
+${SQLREAD}:	${SQLREAD.o} ${LIBSQLCMD}
+	${ESQL} -o $@ ${SQLREAD.o} ${LDFLAGS} ${SQLCMDLIBS}
+
+${SQLUPLOAD}:	${SQLUPLOAD.o} ${LIBSQLCMD}
+	${ESQL} -o $@ ${SQLUPLOAD.o} ${LDFLAGS}
+
+${MKPROC}:	${MKPROC.o} ${LIBSQLCMD}
+	${ESQL} -o $@ ${MKPROC.o} ${LDFLAGS}
+
+${APPBLOB}:	${APPBLOB.o} ${LIBSQLCMD}
+	${ESQL} -o $@ ${APPBLOB.o} ${LDFLAGS}
+
+${INSBLOB}:	${INSBLOB.o} ${LIBSQLCMD}
+	${ESQL} -o $@ ${INSBLOB.o} ${LDFLAGS}
+
+${MULTIBLOB}:	${MULTIBLOB.o} ${LIBSQLCMD}
+	${ESQL} -o $@ ${MULTIBLOB.o} ${LDFLAGS}
+
+${SELBLOB}:	${SELBLOB.o} ${LIBSQLCMD}
+	${ESQL} -o $@ ${SELBLOB.o} ${LDFLAGS}
+
+${UPDBLOB}:	${UPDBLOB.o} ${LIBSQLCMD}
+	${ESQL} -o $@ ${UPDBLOB.o} ${LDFLAGS}
+
+${SQLRELOAD} ${SQLUNLOAD}:	${SQLCMD}
+	${RM} $@; ln $? $@
+
+${HISTDUMP}:	${HISTDUMP.o} ${LIBSQLCMD}
+	${CC} -o $@ ${HISTDUMP.o} ${LDFLAGS}
+
+${HISTTEST}:	${HISTTEST.o} ${LIBSQLCMD}
+	${ESQL} -o $@ ${HISTTEST.o} ${LDFLAGS} ${LIBS}
+
+esqlver.o: esqlver.c
+	${CC} ${CFLAGS} -DESQLC_STRING='"${ESQLC_VERTEXT}"' -c esqlver.c
+
+sqlread.c:	sqlcmd.c
+	${RM} $@
+	${LN} $? $@
+
+sqlread-internal.c:	internal.c
+	${RM} $@
+	${LN} $? $@
+
+sqlread-sqlstmt.ec:	sqlstmt.ec
+	${RM} $@
+	${LN} $? $@
+
+sqlread.o:	sqlread.c
+	${CC} -c ${CFLAGS} ${CFLAGS_SQLREAD} $*.c
+
+sqlread-internal.o: sqlread-internal.c
+	${CC} -c ${CFLAGS} ${CFLAGS_SQLREAD} $*.c
+
+sqlread-sqlstmt.o: sqlread-sqlstmt.ec
+	${ESQL} -c ${CFLAGS} ${CFLAGS_SQLREAD} $*.ec
+
+#################################
+# Test programs - for debugging #
+#################################
+
+# Note that many library functions can be compiled into
+# standalone test programs.  Use readcmd to debug command
+# reading; use connecty to test the grammar for recognizing
+# things like SET CONNECTION vs SET PDQPRIORITY and LOAD
+# statements; use grammar to get a vision of the future.
+# All such programs must be compiled with -DTEST to define
+# the main program.  Look at the test code to see whether
+# the test is interactive or works from fixed data.  The
+# test programs usually rely on some of the library code.
+
+readcmd:	readcmd.c
+	${CC} -o $@ ${CFLAGS} -DTEST readcmd.c ${LDFLAGS}
+
+# JL 2007-05-10: After adventures with GNU Make and no Yacc (also on
+# AIX), revise this rule and depend on make having a .y.c rule built-in.
+connecty: ${GRAMMAR.c}
+	${ESQL} -o $@ -DYYDEBUG -DTEST ${CFLAGS} ${GRAMMAR.c} ${LDFLAGS}
+	${RM} y.tab.[co]
+
+grammar:	grammar.y
+	${YACC} ${YFLAGS} -d $*.y
+	mkkwlist.sh
+	${CC} -o $@ -DTEST -DYYDEBUG ${CFLAGS} y.tab.c ${LDFLAGS}
+	${RM} y.tab.[co]
+
+no-yacc:
+	${MV} ${GRAMMAR.y} old.${GRAMMAR.y}
+	${CP} ${BACKUPY.c} ${GRAMMAR.c}
+
+test:   all
+	(cd Test; ${MAKE} $@)
+
+#############################
+# Include file dependencies #
+#############################
+
+# Not for general use - requires JLSS mkdep command
+depend:
+	mkdep -fDepend.mk ${CFLAGS} ${FILES.c} ${FILES.ec} ${GRAMMAR.y}
+	sed '/${GRAMMAR.y}/d' Depend.mk > xxx.mk; mv xxx.mk Depend.mk
+
+include Depend.mk
+
+#######################
+# Distribution System #
+#######################
+
+install:	all jlss
+	[ -d ${BINDIR}  ] || ${MKPATH} ${BINDIR}
+	[ -d ${MAN1DIR} ] || ${MKPATH} ${MAN1DIR}
+	[ -d ${ETCDIR}  ] || ${MKPATH} ${ETCDIR}
+	${INSTALL_PROG} ${MKPROC}      ${BINDIR}/${MKPROC}
+	${INSTALL_PROG} ${NEWSERVER}   ${BINDIR}/${NEWSERVER}
+	${INSTALL_PROG} ${SQLCLEAN}    ${BINDIR}/${SQLCLEAN}
+	${INSTALL_PROG} ${SQLCLIENT}   ${BINDIR}/${SQLCLIENT}
+	${INSTALL_PROG} ${SQLCMD}      ${BINDIR}/${SQLCMD}
+	${INSTALL_PROG} ${SQLREAD}     ${BINDIR}/${SQLREAD}
+	${INSTALL_PROG} ${SQLUPLOAD}   ${BINDIR}/${SQLUPLOAD}
+	${INSTALL_PROG} ${SQLSERVER}   ${BINDIR}/${SQLSERVER}
+	${INSTALL_PROG} ${JLSS}        ${ETCDIR}/${JLSS}
+	${INSTALL_DATA} mkproc.1    ${MAN1DIR}/mkproc.1
+	${INSTALL_DATA} sqlclean.1  ${MAN1DIR}/sqlclean.1
+	${INSTALL_DATA} sqlcmd.1    ${MAN1DIR}/sqlcmd.1
+	${INSTALL_DATA} sqlserver.1 ${MAN1DIR}/sqlserver.1
+	${INSTALL_DATA} sqlupload.1 ${MAN1DIR}/sqlupload.1
+	${INSTALL_DATA} sqlcmd.ins  ${ETCDIR}/sqlcmd.ins
+	${INSTALL_DATA} sqlcmd.lst  ${ETCDIR}/sqlcmd.lst
+	cd ${BINDIR} ; \
+		${RM} ${SQLRESET};  ${LN} ${SQLCLEAN}  ${SQLRESET}; \
+		${RM} ${SQLRELOAD}; ${LN} ${SQLCMD}    ${SQLRELOAD}; \
+		${RM} ${SQLUNLOAD}; ${LN} ${SQLCMD}    ${SQLUNLOAD}; \
+		${RM} ${SQL};       ${LN} ${SQLCLIENT} ${SQL}
+
+include Install.mk
+
+.FORCE:
+
+###########
+# Cleanup #
+###########
+clean:
+	${RM} ${PROGRAMS} jlss mkbod
+	${RM} ${LIBSQLCMD} *.o
+	${RM} core a.out
+
+realclean:	clean
+	${RM} Makefile config.h sqlcmd.ins esqlinfo.h
+	${RM} config.log config.status config.cache
+	${RM} sqlread-internal.c sqlread-sqlstmt.ec sqlread-sqlstmt.c sqlread.c
+	${RM} connecty.c selmultiblob.mk
+	${RM_FR} BOD
+
+distclean:  realclean

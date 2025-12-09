@@ -1,0 +1,178 @@
+Things to be done to SQLCMD
+===========================
+
+1.  ToDo 1993-03-05: NoFix 2001-08-31: Ensure a clean calling hierarchy;
+    that is, ranlib (lorder | tsort) should not complain about cycles.  [No
+    longer conceived of as a big problem, especially since Linux does not
+    support lorder.]
+
+2.  ToDo 1993-03-05: Done 1997-01-28: Upgrade readcmd.c to handle CREATE
+    PROCEDURE (Ugghhh!!).
+
+3.  ToDo 1993-03-05: Done 1997-01-28: Consider using EXEC SQL in lieu of $
+    in ESQL/C code.
+
+4.  ToDo 1993-03-05: Fix it to obey DBMONEY on output of decimal, float,
+    money data.
+
+5.  ToDo 1993-03-05: Done 2001-04-05, 2004-01-14: Add verbose option that
+    designates operation, rows processed, warnings, etc.
+
+6.  ToDo 1993-03-05: Done 1993-03-23: Print ISAM error message too.
+
+7.  ToDo 1993-03-05: Done 1993-03-23: Review the use of @e @x @b @v @q
+    (exit, edit, bye, view, quit).  Retained.
+
+8.  ToDo 1993-03-05: Done 1993-03-23: Add/revise cleanup targets to
+    makefiles
+
+9.  ToDO 1993-03-23: Done 1993-05-17: Check the unload format for
+    conformity with ISQL.
+
+10. ToDo 1993-05-17: NoFix 1997-01-28: Think rather hard about support for
+    DBTIME.  It isn't trivial, as a first pass showed.  [Decision: DBTIME
+    is irrepairably broken in concept - it will not be implemented.]
+
+11. ToDo 1993-05-17: Done: 1999-04-12: Create some sort of
+    auto-configuration script.
+
+12. ToDo 1993-05-17: Done 1997-01-28: Create and use esql5_01.h, or
+    whatever.  Needs _iqnprep() added.
+
+13. ToDo 1997-01-28: Done 1998-05-15: Add CONNECT, SET CONNECTION and
+    DISCONNECT functionality.  Note that these statements are not
+    preparable, so they'll have to be treated like internal statements.
+
+14. ToDo 1997-04-17: Partial 2004: Add minimal support for Informix
+    Universal Server (IUS), then Informix Dynamic Server Universal Data
+    Option - IDS/UDO, and since then Informix Dynamic Server and Informix
+    Internet Foundation.
+
+15. ToDo 1998-05-15: NoFix 2000-06-12: Improve output format for INFO
+    statements.  [The output comes from the basic SELECT mechanism and has
+    the advantage of consistency if nothing else.  Besides, if you want
+    formatted data, use the XML format option and run the output through a
+    suitable processor.]
+
+16. ToDo 2000-05-25: Hack build to distribute esql.v5.patch and
+    esql.v4.patch for old esql. [2004-01-14: ESQL/C v4.xx is not supported
+    at all.]
+
+17. ToDo 2000-05-25: Done 2001-01-11: Hack configure.in script to apply the
+    patch automatically.
+
+18. ToDo 2000-05-25: Done 2000-06-12: Add XML output, with tag in lieu of
+    <RECORD>...</RECORD> defined as additional word in format command.
+
+19. ToDo 2000-05-25: Done 2001-08-31: Reject XML input, with reasons
+    documented in ChangeLog.
+
+20. ToDo 2000-06-12: Done 2001-09-02: Complete the INFO statements (ACCESS,
+    FRAGMENTS, etc).
+
+21. ToDo 1998-05-15: Include IUS support for column types.
+
+22. ToDo 2000-07-12: Connection information loses track of database when
+    you connect to default or connect to '@server' and subsequently do some
+    sort of DATABASE operation (DATABASE, CREATE DATABASE, CLOSE DATABASE,
+    ROLLFORWARD DATABASE).
+
+23. ToDo 2001-01-07: Done 2005-02-28: Consider adding FORMAT information to
+    UNLOAD (and maybe LOAD) command, overriding the global format setting
+    (which should be retained for formatting SELECT output, and default
+    LOAD and UNLOAD format).
+
+24. ToDo 2001-01-07: Update code to use 'portable' types.  Use ixInt2,
+    ixInt4, ixMint, defined in esqlc.h.  For versions of CSDK (later than
+    2.10) which include the int2, int4, mint type definitions in the ESQL/C
+    header, use those typenames.  For versions of CSDK without those
+    definitions, create the appropriate set of definitions.  Note that on
+    32-bit machines, this is trivial; int2 -> short, int4 -> long, mint ->
+    int.  On 64-bit machines, this may not be as trivial; int4 -> int is a
+    possibility.
+
+25. ToDo 2001-01-11: Done 2001-08-29: Investigate what it would take to
+    make #!/path/to/sqlcmd work in an executable script.
+
+26. ToDo 2001-01-11: Done 2001-04-05: Add a -v option to report on SQLCODE,
+    ISAM error, SQLSTATE, rows processed, last serial number, etc.  Repeat
+    of item 5.
+
+27. ToDo 2001-03-04: Implement the unimplemented parts of SQLUPLOAD.
+
+28. ToDo 2001-03-04: Add the UPLOAD design documentation.
+
+29. ToDo 2001-08-31: Fixed 2003-12-01: Provide metadata with XML output.
+    For example, record the types and the generating statement.
+
+30. ToDo 2001-08-31: Consider alternative formats for INFO INDEXES.  The
+    current format presents information about 16 columns in a single row of
+    data, and loses the information about ascending versus descending
+    orders (though who uses descending order indexes?).  An alternative
+    would list one row for each column in the index.  The difficulty here
+    is the overhead per row; there is currently information about the
+    constraint name and the index name.  It is tempting to think in terms
+    of "INFO INDEXES FOR tabname" as now, and "INFO INDICES" with an
+    optional WHERE clause to list any indexes in the database, plus INFO
+    INDEXCOLS FOR idxname.  Note that the SQL statements to list the index
+    columns with IDS or OnLine indexes are gruesome regardless of which
+    layout is chosen; you choose between a 16-way outer join or a 16-way
+    UNION.
+
+31. ToDo 2001-08-31: Hack the configure to detect and handle nastinesses
+    like the "+DS2.0 +DA2.0W" options to the HP-UX 11.00 ANSI C compiler
+    which tell it to produce PA-RISC 2.0 (64-bit) code, etc.
+
+32. ToDo 2001-09-02: Rework system to use some sort of translatable message
+    file for messages (error and informative), etc.  The obvious idea is to
+    use an Informix Error Message (.iem) file.  Need a custom version of
+    mkmessage - which is not exactly rocket science.  More problematic is
+    where to put the file.  At the moment, we don't need any runtime
+    material not located via $INFORMIXDIR, but we cannot guarantee that
+    SQLCMD can be installed in there.  I'm loathe to mandate
+    ${SQLCMDDIR:-${INFORMIXDIR:-/usr/informix}}, but that may be the
+    simplest.  Otherwise, we use --prefix=/where/ever and hardcode that as
+    a default location: ${SQLCMDDIR:-$prefix}.  Then there's the problem of
+    locating the file for different languages.  Consider SQLCMDMSGFILE
+    environment variable which specifies exact name of appropriate message
+    file, but that leaves a problem with English messages.  If they remain
+    hard-coded, this may be OK.  Alternatively, use GNU gettext() etc.
+
+33. ToDo 2001-09-03: Rework SQLUPLOAD code to give sensible diagnostics.
+    And ensure that you know how to specify owner name with a MODE ANSI
+    database; the current code gets confused in sql_tabid() if you don't
+    use quotes, and it gets confused in table_exists() if you do use them.
+    The latter is probably the more seriously confused function.
+
+34. ToDO 2001-10-01: Done 2003-04-22: Modify history mechanism to handle
+    concurrent access from multiple users.  It is debatable whether the new
+    mechanism achives the 'without gross inefficiency' of the original
+    requirement.
+
+35. ToDo 2001-10-10: Revise rjust() code in output.c to justify in situ.
+
+36. ToDo 2001-10-10: Fixed 2005-05-06: Provide delimited fixed-width output
+    with format 'fixsep'.  Fields are separated by current field delimiter.
+
+37. ToDo 2001-10-11: Use a macro-style mechanism in INFO commands to avoid
+    the massive repetition that currently occurs.
+
+38. ToDo 2001-12-31: Fixed 2004-08-17: support DB-Access style
+    backslash-space notation for empty non-null VARCHAR, NVARCHAR and
+    LVARCHAR data.
+
+39. ToDo 2001-12-31: support DB-Access -X style \XX notation for
+    non-printable ASCII characters.
+
+40. ToDo 2005-11-18: Upgrade format command to recognize:
+    format {fixed|variable} {separated|delimited} {quoted|unquoted}
+    [{separator|delimiter} 'x'][escape 'y'][eor 'z'][quote 'q']
+    plus the XML options, plus the legacy options, etc.
+    Default setting would be variable separated unquoted.
+    The fixdel (fixed delimited) and fixsep (fixed separated) options
+    finish precipitating this crisis.  They're useful; the context code
+    and (more particularly) the output code are nasty.
+
+Jonathan Leffler
+JLSS
+@(#)@(#)$Id: TODO,v 2005.3 2005/11/18 20:22:53 jleffler Exp $

@@ -1,0 +1,1364 @@
+.\" @(#)$Id: sqlcmd.1,v 2015.1 2015/11/09 01:37:12 jleffler Exp $
+'\" @(#)Documentation for SQLCMD Version 90.02 (2016-07-28)
+'\" Note - Format lines with: fill -stl72
+.ds fC "Version $Revision: 2015.1 $ ($Date: 2015/11/09 01:37:12 $)
+.ds c \&\s10\f(CW
+.ds d \&\fP\s0
+.de HS
+.in +0.7i
+..
+.de HI
+.ne 2
+.br
+.ti -0.7i
+\fB\\$1\fP
+.br
+.sp -1
+..
+.de HE
+.br
+.in -0.7i
+..
+'\"
+.TH SQLCMD 1 "JLSS Informix Tools"
+.SH NAME
+sqlcmd \(em SQL command interpreter
+.br
+sqlunload \(em unload tables from database
+.br
+sqlreload \(em load tables from ASCII files
+.br
+sqlread \(em Read-only variant of sqlcmd
+.br
+sqlserver \(em background process to execute SQL commands on request
+.br
+sqlclient \(em foreground process to request sqlserver to execute SQL commands
+.br
+newclient \(em alternative mechanism to start \fBsqlserver\fP
+.SH SYNOPSIS
+\fBsqlcmd\fP [-cghsvxy] [-d dbase] [-f file] [-e 'SQL statement'] \e
+.br
+\h'\w"\fBsqlcmd\fP"u' [-BCHIJRTUVY] [-A date] [-M FIFO] [-D delim] [-E escape] [-Q quote] \e
+.br
+\h'\w"\fBsqlcmd\fP"u' [-F format] [-L qlimit] [-Z debug] [-u username] [-p password] \e
+.br
+\h'\w"\fBsqlcmd\fP"u' [-N txsize] [-a ibase] [-G eor] [-O orderby] [-S skip] [-z number] \e
+.br
+\h'\w"\fBsqlcmd\fP"u' [-X recset=settag,record=rectag,header=hdrtag] ['SQL statement' ...]
+.br
+\fBsqlcmd\fP -J [{dbase|-}] [{file|-}]
+.br
+\fBisql\fP [{dbase|-}] [{file|-}]
+.br
+\fBdbaccess\fP [{dbase|-}] [{file|-}]
+.br
+\fBsqlunload\fP -d database -t table [-o file] [-O orderby]
+.br
+\fBsqlreload\fP -d database -t table [-i file] [-S skip]
+.br
+\fBsqlread\fP [\fIoptions as for \fP\fBsqlcmd\fP]
+.br
+\fBnewserver\fP [-d database]
+.br
+\fBsqlserver\fP [-d database]
+.br
+\fBsqlclient\fP 'SQL statement'
+'\"
+'\" -----------------------------------------------------
+'\"
+.SH DESCRIPTION
+The three programs \fBsqlcmd\fP, \fBsqlunload\fP and
+\fBsqlreload\fP are actually links to a single executable file.
+However, the way they behave depends on which name they are invoked by.
+The other three programs are shell scripts which illustrate
+the use of the `\*c-M\*d' option of \fBsqlcmd\fP.
+'\"
+'\" -----------------------------------------------------
+'\"
+.SH SQLCMD
+The program \fBsqlcmd\fP is analogous to the batch mode operation
+of \fBisql\fP or DB-Access (\fBdbaccess\fP), but it is intended
+for use in shell scripts.
+It is less noisy, faster, and more disciplined with its exit
+status than \fIisql\fP is.
+Unless otherwise requested, the only text to appear on standard output
+will be the results of \s-2SELECT\s0 statements (or the results from
+stored procedures) and the results of the built-in commands.
+It can also be run interactively, in which case there is a
+built-in history facility which allows previously executed
+commands to be listed, edited and rerun.
+'\"
+'\" -----------------------------------------------------
+'\"
+.SH "COMMAND LINE OPTIONS"
+The option `\*c-C\*d' forces \fIsqlcmd\fP, \fIsqlunload\fP or
+\fIsqlreload\fP to behave like \fIsqlcmd\fP.
+The option `\*c-J\*d' forces \fIsqlcmd\fP, \fIsqlunload\fP or
+\fIsqlreload\fP to behave like \fIdbaccess\fP or \fIisql\fP.
+The option `\*c-R\*d' forces \fIsqlcmd\fP, \fIsqlunload\fP or
+\fIsqlreload\fP to behave like \fIsqlreload\fP.
+The option `\*c-U\*d' forces \fIsqlcmd\fP, \fIsqlunload\fP or
+\fIsqlreload\fP to behave like \fIsqlunload\fP.
+These options should appear first for maximum safety.
+If some options for the `default' command have been processed and then
+one of these options overrides the `default' command, error messages
+that should not appear can be generated and error messages that should
+have appeared might not be generated.
+For example, if you specify `\*c-o\*d' to \fIsqlcmd\fP before you
+specify `\*c-U\*d', then you will get an error as `\*c-o\*d' only
+applies to \fIsqlunload\fP.
+These options help meet the GNU coding standard guidelines.
+.P
+The (new in version 85.00) mode for compatibility with \fIdbaccess\fP
+and \fIisql\fP make it easier to use \fIsqlcmd\fP as a direct
+replacement for the standard Informix utilities.
+In \fIdbaccess\fP mode, the command line does not accept the `\*c-d\*d'
+or `\*c-f\*d' options.
+It will accept one or two arguments.
+The first may be the name of a database, or a single dash `\*c-\*d' to
+indicate that no database is pre-selected.
+The second may be the name of a script, or a single dash `\*c-\*d' to
+indicate that it should run interactively.
+If there is no second argument, it runs interactively anyway.
+In \fIdbaccess\fP mode only, you may specify a file name with no
+extension and \fIsqlcmd\fP will add the `\*c.sql\*d' extension to the
+name for you.
+If you specify any other extension, \fIsqlcmd\fP adds the `\*c.sql\*d'
+extension anyway, just like \fIdbaccess\fP and \fIisql\fP do.
+Note that you have to install the links \fIisql\fP or \fIdbaccess\fP
+manually; the automatic install does not do so.
+You can also specify some options, such as format control, on the
+command line before the database and script options.
+However, doing so is not using pure compatibility mode.
+In terms of error handling, \fIsqlcmd\fP in \fIdbaccess\fP mode behaves
+like \fIsqlcmd\fP; to get the ignore error behaviour of DB-Access, you
+must specify the `\*c-c\*d' option.
+.P
+Normally, \fIsqlcmd\fP terminates immediately on encountering an
+error, and its exit status is non-zero.
+This can be changed using the `\*c-c\*d' flag to continue after an error.
+If \fIsqlcmd\fP is reading its standard input because no
+actions or files were specified, (or if the `\*c-I\*d' flag is used)
+the `\*c-c\*d' flag is automatically set.
+.P
+When given the `\*c-h\*d' flag, \fIsqlcmd\fP prints out its version
+information, the summary usage that is given for any incorrect usage,
+and a more verbose explanation of each of the options.
+.P
+When run non-interactively, \fIsqlcmd\fP does not record what it
+does in the history file (see below).
+The `\*c-y\*d' flag is used to force commands into the
+history file after all.
+By contrast, the `\*c-Y\*d' flag turns off history even when
+\fIsqlcmd\fP is used interactively.
+This is occasionally useful if your history file is not publicly
+writable (a good idea) and you need to work as a different user
+(via \fIsu\fP or \fIsudo\fP).
+.P
+Normally, error messages are printed on standard error.
+If the `\*c-s\*d' option is specified, the error messages are suppressed.
+Normally, the information in the sqlca area is not printed except when
+there is an error.
+If the `\*c-v\*d' option is specified, then \fIsqlcmd\fP runs in
+verbose mode and prints appropriate sub-fields of the sqlca record
+after each SQL statement.
+Specifically: if there is a serial number value (other than zero), it
+is printed; if there is a number of rows affected, it is printed; if
+there is a last ROWID affected, it is printed; if the warning
+information is not blank, it is printed.
+Note that when you create a table, the initial value of the serial
+counter is reported; this is an artefact of the server, not a property
+of \fIsqlcmd\fP.
+.P
+Starting with version 85.00, and only if the program has been compiled
+with the option enabled, then \fIsqlcmd\fP will single-step through
+command files, stopping with a `Hit return to continue' prompt between
+each statement.
+This will only occur if you invoke the `\*c-g\*d' ooption on the command
+line, or use `single on' as a command, and even then only if `/dev/tty'
+can be opened successfully.
+.P
+If the `\*c-x\*d' option is specified, the executed
+statements are printed on standard error, prefixed by `+\0'
+(as in `\*csh -x\*d').
+.P
+If required, a database can be pre-selected using the `\*c-d\*d' option.
+This executes a \s-2DATABASE\s0 statement and therefore uses an
+implicit connection.
+If you have specified both the `\*c-u\*d' with a username and the
+`\*c-p\*d' option with a password prior to the occurrence of the
+`\*c-d\*d' option, then the default connection will be
+established with the given username and password.
+It is not ideal to specify the password on the command line, but
+other methods of handling it are equally clumsy.
+See the section on Connection Management Commands for alternative
+methods of connecting to a database.
+.P
+New in January 2005: the environment variable \*cSQLCMDPASSWORDS\*d
+can specify a file name which has the same contents as the file
+specified by the INFOTPASS environment variable supported by the
+\fBinfotables\fP command by Ravikrishna (rkusenet@sympatico.ca).
+The file contains the database name, followed by a pipe symbol,
+the user name, another pipe, and the password (which may contain
+further pipe symbols) up to the newline character.
+Note that the permissions on the file should be 600 or 400, but this
+is not verified for you.
+If you specify a database and do not specify a password, and the
+environment variable points to a readable file, then the
+database name will be used to search for a password and possibly
+the user name too.
+If both a user name and the database name are given, then the
+first entry which matches the database name (case-insensitively)
+and the user name will provide the password.
+(Temporary implementation quirk: the user name comparison is
+case-insensitive.  Do not exploit this; it will change.)
+If just the database name is given (no user name), then the first
+entry which matches the given database will be used and will give
+both the user name and password.
+The benefit of this system is that it permits you to conceal the
+password (and often the user name) used to connect to the
+database.
+.P
+The `\*c-F\*d' flag is used to set the output format.
+This defaults to \fIselect\fP, but can be set to \fIunload\fP,
+\fIquote\fP, \fIcsv\fP, \fIfixed\fP, \fIfixsep\fP, \fIHTML\fP, \fIXML\fP
+or \fIblock\fP if required.
+The difference between \fIselect\fP format and \fIunload\fP format is
+that \fIunload\fP format has the last field terminated by a delimiter,
+whereas \fIselect\fP format does not.
+The difference between \fIquote\fP and \fIcsv\fP is that \fIcsv\fP also
+sets the delimiter to comma `\*c,\*d', whereas \fIquote\fP uses the
+normal delimiter.
+In \fIquote\fP and \fIcsv\fP mode, all types except the numeric are
+embedded in quotes.
+.P
+\fINote that it is not 100% clear what escaping conventions
+should be used in quote/csv format.
+The convention actually used is to escape any embedded quotes by
+doubling them up\fP.
+.P
+The difference between \fIfixed\fP format and \fIfixsep\P format
+is that \fIfixsep\fP puts a delimiter between the fixed-length
+fields whereas \fIfixed\fP does not.
+It is easier to read \fIfixsep\fP output, but it wastes space.
+The fixed format output uses constant-width fields for the data.
+Any \s-2VARCHAR\s0 data is blank padded.
+Blobs are not permitted.
+Multi-line data is permitted, but will probably cause problems.
+.P
+The XML output mode is simple-minded.
+Each output record is presented (by default) as a `\*c<record>\*d' tag,
+followed by each field enclosed within a tag built from the column name
+and the `\*c</record>\*d' end tag.
+Each field is on a separate line, and the close record tag is followed
+by a blank line.
+The entire result set is enclosed (again, by default) between
+`\*c<sqlcmd_record_set>\*d' and `\*c</sqlcmd_record_set>\*d' tags.
+If heading or type information is requested, it appears (by default)
+between `\*c<header>\*d' and `\*c</header>\*d' tags.
+You can control these tags with `\*c-X\*d' command line option or the
+`\*cformat xml\*d' built-in followed by suitable sub-options.
+.P
+The HTML output mode is fairly simple-minded.
+It generates a simple HTML table from the opening `\*c<table>\*d' to the
+closing \*d</table>\*d' tags, with column headings unconditionally, and
+with type names if requested.
+It does not generate the `\*c<html>\*d', '\*c<head>\*d', or
+`\*c<body>\*d' tags, and it does not specify the widths of the columns
+(so long character columns probably don't wrap, and so on).
+.P
+\fIBlock\fP mode simulates DB-Access in printing each row as a series of
+lines with column name on the left and value on the right.
+It differs from DB-Access in always printing the full column name (even
+if it is longer than 18 characters), and it does not wrap the column
+value at all.
+If you print a string-like column that contains newlines, the
+continuation lines will not be indented.
+.P
+Note that \fIsqlcmd\fP does not accept XML input; the parsing involved
+is too complex.
+If you need to handle XML input, create an XML-to-UNLOAD format
+converter outside of \fBsqlcmd\fP and then load the data normally.
+.P
+The `\*c-X\*d' option is followed by a comma-separated list of sub-options,
+each of which specifies either the XML record set tag (recset=settag) or
+the XML record tag (record=rectag) or the XML header tag (header=hdrtag).
+.P
+The `\*c-a\*d' flag is used to specify the input base for integers.
+The default value is zero, meaning that 0x precedes a hexadecimal
+number, 0 precedes an octal number, and otherwise it is decimal.
+However, external data sometimes has leading zeroes on decimal
+fields, in which case, the input base should be set to 10.
+Any value from 2 to 36 is accepted, as well as zero; invalid
+values are silently treated as zero.
+.P
+The `\*c-L\*d' flag is used to limit the number of rows printed by a
+\s-2SELECT\s0 statement.
+The default value of zero means print all rows; any positive value limits
+the number of rows for a single \s-2SELECT\s0 statement so that no more than
+that number of rows is printed.
+There is no warning when the data is truncated.
+.P
+When the results of a \s-2SELECT\s0 statement are printed, each
+row of data will be printed on one line with the character
+fields clipped and a delimiter separating each field.
+By default, the fields will be separated by the \s-2DBDELIMITER\s0
+symbol, which defaults to the pipe symbol `\*c|\*d'.
+However, if the command line option `\*c-D\*d' was used,
+the first character of the argument becomes the delimiter.
+However, notations such as `\*c\ex\*d', `\*c'x'\*d', `\*c"x"\*d'
+are interpreted in the same way as in C.
+This includes `\*c'\en'\*d' for newline and `\*c'\et'\*d' for tab.
+If the quote character is one of the shell escape
+characters (say a double quote `\*c"\*d'), make sure that
+the command line argument is preceded by a backslash.
+If the delimiter occurs in any field, the delimiter is
+escaped by the escape character, which defaults to the
+backslash `\*c\e\*d'.
+If the escape character occurs in any field, it is doubled up.
+The escape character can be altered using the `\*c-E\*d' option,
+which takes the same sorts of string as the `\*c-D\*d' option.
+Additionally, some non-Informix products prefer character
+strings to be enclosed in quotes.
+The relevant quote character can be set using the `\*c-Q\*d' option,
+which also takes the same sorts of string as the `\*c-D\*d' option.
+This is more thorough than the standard Informix utilities.
+In particular, if \s-2DBDELIMITER\s0 is set to a digit, the
+Informix version of the unloaded data cannot be loaded back
+into the database; with \fIsqlcmd\fP, it can.
+The standard Informix utilities do not recognise
+the escape and quote characters, but these facilities were
+provided to help cope with exporting data to other
+databases, and importing it back again.
+.P
+The `\*c-G\*d' option is used to set the EOR (end-of-record) string on
+the command line.
+You can also set the DBNEWLINE environment variable (unique to SQLCMD)
+to specify the EOR.
+You can use notations such as `\*c-G '\r\n'\*d' to specify that the EOR
+should be CRLF, making the output suitable for transfer to Windows
+environments.
+At the moment, only the first character of the EOR string is escaped
+when encountered in the data.
+This may not be sufficient if you use a repeated character (say, double
+spacing records).
+.P
+The `\*c-A\*d' flag is used to set the date format for selected data.
+The flag is not very mnemonic, but all the other letters of `date' are
+already in use.
+The format string should be some combination of the codes
+`\*cdd\*d', `\*cddd\*d', `\*cmm\*d', `\*cmmm\*d',
+`\*cyy\*d', and `\*cyyyy\*d', and can be organised as required.
+The format string is not validated in any way.
+If this flag is not specified, the value of the \s-2DBDATE\s0
+environment variable is converted into a date format.
+.P
+The `\*c-H\*d' flag specifies that the output from any select
+statement should be preceded by the column headings that would
+have been supplied by \fIisql\fP or \fIdbaccess\fP, except that
+where they would print "(expression)", \fBsqlcmd\fP will print a
+name such as `\*csqlcmd_001\*d'.
+The generated names are unique to each statement, but the numbers
+recycle from one for each separate statement.
+The `\*c-T\*d' flag specifies that the output from any select
+statement should be preceded by the types of the results.
+If both `\*c-H\*d' and `\*c-T\*d' are specified, the column
+headings come before the column types.
+.P
+The `\*c-V\*d' flag causes the current version of the program to
+be printed on standard output.
+If you see the version `\*c:\&SQLCMD\&:\*d', it means that the
+program has not been compiled correctly.
+.P
+The `\*c-M\*d' option is followed by the name of a \s-2FIFO\s0
+(or named pipe) and it puts \fBsqlcmd\fP into \fImonitor\fP mode.
+In monitor mode, \fIsqlcmd\fP repeatedly opens the \s-2FIFO\s0,
+and reads and executes a sequence of commands until it read an
+end-of-file indication.
+(When a program attempts to open a \s-2FIFO\s0 which no process
+has open for writing, it is blocked until another process does
+open it for writing.
+When the writing process closes the \s-2FIFO\s0, the reading
+process (\fIsqlcmd\fP) reads an end-of-file indicator.)
+This is \fImonitor\fP mode \(em it is intended for use by shell
+scripts in which \fIsqlcmd\fP is started once, responds to many
+successive queries or other database actions, and eventually dies
+when a command tells it to exit.
+To use this effectively, you need to know about the I/O
+redirection commands documented below.
+The scripts \fIsqlclient\fP, \fInewclient\fP and \fIsqlserver\fP
+make use of this facility.
+.P
+The `\*c-I\*d' option is used to indicate that the program
+should go into interactive mode.
+This will happen anyway unless either the `\*c-V\*d' flag
+is specified, or there are some trailing arguments without
+option flags, or some commands are executed using the
+`\*c-e\*d' or `\*c-f\*d' flags.
+If interactive mode is entered, the history mechanism is
+automatically turned on, and if the standard input is a terminal,
+continue mode is turned on.
+.P
+The `\*c-B\*d' option is used to indicate that the program should
+go into benchmark mode, which means that all SQL statements (plus
+the \s-2LOAD\s0, \s-2RELOAD\s0, and \s-2UNLOAD\s0 statements) are
+automatically date stamped, traced and timed, with the
+information going to the error output.
+As the name suggests, it is of most use in benchmark situations
+where the time taken to execute each statement is of interest,
+and it is a nuisance to have to edit the script to insert
+`\*ctime\*d', `\*cclock start\*d' and `\*cclock stop\*d'
+statements around each SQL statement.
+The clock used by benchmark mode is independent of the clock used
+by the ordinary \*cclock\*d commands, which allows the script to
+use explicit \*cclock\*d commands and obtain useful results.
+.P
+Any extra arguments which are not prefixed with a flag are taken
+as either file names or statements.
+Since all \s-2SQL\s0 commands consist of at least two words,
+the heuristic used to distinguish between file names and commands
+is the presence of a blank or tab character in the string.
+.P
+To match the other SQL command interpreters and the Informix database
+servers, \fIsqlcmd\fP recognises three comment conventions:
+the Informix `\*c{\|}\*d' convention encloses a comment,
+the ISO SQL-92 convention uses `\*c--\*d' to start a comment which is
+terminated by the end of the line,
+and the ISO SQL-99 convention which uses the C style `\*c/*\*d' to start
+a comment and `\*c*/\*d' to end the comment.
+(Note that the C style comments are available in IDS 7.31 and IDS 9.30
+and later versions, but are not documented in the Informix manuals.)
+These comment conventions are ignored inside quoted strings.
+Quoted strings are allowed to extend over several lines and are
+started and ended by the same character, which is either
+`\*c'\*d' or `\*c"\*d'.
+.P
+Note that versions of \fIsqlcmd\fP prior to version 62 recognized
+`\*c#\*d' as starting a comment to the end of the line, but the
+9.2x versions of IUS use the `\*c#\*d' symbol to mark a statement
+local variable (SLV or OUT parameter), so this can no longer be
+supported.
+DB-Access uses lines starting with `\*c#\*d' to mark where syntax
+errors were detected, but deletes those lines before submitting a
+query to the database server.
+If it proves desirable, \fIsqlcmd\fP can be enhanced to delete
+lines starting with `\*c#\*d'.
+Note that in versions prior to version 59, comments were deleted
+from the history log, but are now recorded in the history file.
+Similarly, the 9.2x versions of IUS use `\*cSET{...}\*d',
+`\*cLIST{...}\*d' and `\*cMULTISET{...}\*d' to denote SET, LIST
+and MULTISET literals.
+This means that the `\*c{\*d' character does not unconditionally
+mark the start of a comment.
+Of course, `\*c{+...}\*d' indicates an optimizer hint when it occurs
+as the first token after the \s-2SELECT\s0 keyword.
+.P
+A line starting `\*c!\*d' marks a one-line shell escape, a
+feature which is also present in both \fIisql\fP and
+\fBdbaccess\fP (though it is undocumented).
+Because \fIsqlcmd\fP uses the library function \fIsystem(3)\fP to
+execute the shell escape, the vagaries of the command
+interpretation are determined by what \fIsystem(3)\fP does.
+'\"
+'\" -----------------------------------------------------
+'\"
+.SH "EXECUTABLE SQLCMD SCRIPTS"
+On Unix and Linux machines that support the `\*c#!\*d' mechanism,
+you can start an \fIsqlcmd\fP script with:
+.eS
+#!/usr/informix/bin/sqlcmd
+.eE
+Obviously, you need to specify the actual pathname of the \fIsqlcmd\fP
+executable.
+Note that the first edition of the Camel book provided a Perl script,
+\fIfixin\fP, which will set the correct interpreter path name
+automatically for you.
+Subsequent editions did not have enough space to keep it.
+A copy of \fIfixin\fP is provided with \fIsqlcmd\fP.
+.P
+Then make the file executable and place it in a directory on your
+\s-2PATH\s0, and by simply specifying the file name, \fIsqlcmd\fP will
+be invoked to read the file.
+You can add one argument after the command name.
+This might typically be some flags (perhaps some permutation or
+combination of `\*c-xHT\*d'), plus the `\*c-d\*d' and the database name:
+.eS
+#!/usr/informix/bin/sqlcmd -xHTdstores
+.eE
+There is no way to provide multiple options that take arguments.
+However, every command line option that takes arguments has an
+equivalent command that can be used in the body of the script.
+.P
+Note that if the user invokes the script with arguments, these are
+processed after the rest of the file.
+This is because what the Unix kernel does is run the program named after
+the `\*c#!\*d', specifying anything after a blank or tab as the first
+argument to the command, followed by the name of the script as the next
+argument, and finally with any user supplied arguments after all these
+items.
+Note that if the script is located via \s-2PATH\s0, then the pathname of
+the script is passed to \fIsqlcmd\fP.
+.P
+As a consequence of this support, \fIsqlcmd\fP actually accepts
+`\*c#!\*d' as the start of a comment, but it translates it into
+`\*c--#!\*d' so that the servers do not get upset by the notation.
+This does not conflict with SLV's where the `\*c#\*d' is followed by a
+type name.
+'\"
+'\" -----------------------------------------------------
+'\"
+.SH "LOAD-RELATED STATEMENTS"
+The \fBsqlcmd\fP program recognizes three load-related
+statements: \s-2LOAD\s0, \s-2UNLOAD\s0 and \s-2RELOAD\s0.
+All three statements support the same basic syntax as \fBisql\fP
+and \fBdbaccess\fP, but also have many extensions over the
+Informix notation.
+There is one important difference: in \fBsqlcmd\fP, the file name
+must be enclosed in single or double quotes.
+(The Informix tools support unquoted file names as well as quoted
+names, but there are technical reasons why it is easy for them to
+do so and it is not easy for \fBsqlcmd\fP to do so; you may ask
+for the sordid details, but it is basically the difference
+between a powerful, flexible, grammar driven statement as found
+in \fBsqlcmd\fP and an ad hoc statement analyzer with limited
+options).
+.P
+The basic \s-2UNLOAD\s0 command supports the same syntax as the
+Informix programs, but also recognizes, as an extension, an
+\s-2EXECUTE PROCEDURE\s0 statement as well as the traditional
+\s-2SELECT\s0 statement.
+.P
+The \s-2LOAD\s0 command supports the same syntax as the Informix
+programs.
+It does no transaction management for you; if your database has
+transactions, you must use a \s-2BEGIN WORK\s0 before the
+\s-2LOAD\s0 statement and a \s-2COMMIT WORK\s0 afterwards, or use
+\s-2RELOAD\s0 instead.
+.P
+The \s-2RELOAD\s0 command is syntactically similar to the
+\s-2LOAD\s0 command (apart from the alternative keyword), but it
+handles transactions in the same way that \fBsqlreload\fP does
+(see below).
+Specifically, it automatically initiates transactions, groups the
+inserts into smaller transactions if there are many rows to be
+loaded, and terminates the transaction on completion.
+.P
+See also \fIFAQ.html\fP for details about extensions to the syntax
+compared with \fBDB-Access\fP.
+Specifically, you can specify the quote and escape characters,
+and the format to be used, as part of the commands.
+The format name is strictly a string here - unlike the format
+statement which accepts a bare word for the format name.
+Note that you can specify a pipe-line as the destination for
+\s-2UNLOAD\s0 or as the source for \s-2LOAD\s0 or \s-2RELOAD\s0.
+You can also append the output from an \s-2UNLOAD\s0 statement to
+an existing file.
+'\"
+'\" -----------------------------------------------------
+'\"
+.SH "CONNECTION MANAGEMENT COMMANDS"
+If your version of \s-2ESQL/C\s0 recognizes the \s-2CONNECT\s0,
+\s-2SET_CONNECTION,\s0 and \s-2DISCONNECT\s0 commands (which
+means that the \s-2ESQL/C\s0 version was released after ESQL/C
+version 6.00; that includes ESQL/C 2.9x), then \fBsqlcmd\fP will
+accept these commands and manage connections for you.
+Because these statements cannot be prepared, the statements have
+to be handled internally by \fBsqlcmd\fP.
+You may use the full syntax supported by \s-2ESQL/C\s0 except
+that the database name, the connection name, the user name and
+the password must always be given as quoted strings (either
+single or double quotes are allowed as long as they are
+self-consistent), and connections cannot be set \s-2DORMANT\s0.
+The keywords which can be used where a connection name can be be
+given (\s-2CURRENT\s0, \s-2DEFAULT\s0 and \s-2ALL\s0) should not
+be quoted.
+.P
+As a convenience, \fBsqlcmd\fP recognizes the keyword \s-2WCT\s0
+as an abbreviation for \s-2WITH CONCURRENT TRANSACTIONS\s0.
+.P
+If you have CSDK 3.70 or later, you may use the keyword TRUSTED (after
+WCT) to indicate that you'd like to create a trusted connection.
+It is only relevant in SQLCMD if you supply both user name and password.
+As a general observation, SQLCMD should not be used to establish a
+trusted connection; it does not qualify as a trustworthy application.
+It is far too general purpose and can be far too easily abused.
+Consider this a length of rope long enough to hang yourself with.
+Please note that the licence does not warrant that the program is fit
+for any purpose.
+You may specify the keyword with earlier versions of CSDK; it is ignored
+when you do so.
+'\"
+'\" -----------------------------------------------------
+'\"
+.SH "INFO COMMANDS"
+\fISqlcmd\fP supports the DB-Access style \s-2INFO\s0 command.
+The output format is very different from DB-Access, and there are more
+options.
+The \s-2INFO\s0 commands can be sub-divided into four groups; those that
+apply independent of a specific database, those that apply to the
+database as a whole, those that apply to a specific table within the
+database, and \s-2INFO HELP\s0 which lists the other available
+\s-2INFO\s0 commands.
+.P
+There are two database independent commands.
+\s-2INFO DATABASES\s0 (aka \s-2DBNAMES\s0 for reasons of backwards
+compatibility), prints out a list of available database names.
+You may not actually be permitted to connect to all the listed
+databases, and there may be other databases to which you could connect
+if you specified both the database name and a server name that is not
+listed in your \*c$DBPATH\*d environment variable.
+The ESQL/C function used to implement this command implicitly connects
+to the server specified by \*c$INFORMIXSERVER\*d if you are not already
+connected to a database server.
+.P
+\s-2INFO CONNECTIONS\s0 prints out a list of connection names and other
+associated information (such as database connected to).
+Note that the current implementation does not track the default
+connection when it is established by a database operation (such as
+\s-2DATABASE\s0 or \s-2CREATE DATABASE\s0, etc).
+This is a bug.
+.P
+The DB-Access command \s-2INFO TABLES\s0 prints a list of the table
+names in the database, listing the owner name, the table name and the
+table ID.
+The tables are the user-defined tables, views, public synonyms and
+private synonyms owned by the user.
+.P
+The extension commands are:
+.HS
+.HI "INFO BASETABLES"
+.br
+prints the information about the base tables in the database.
+.HI "INFO SYNONYMS"
+.br
+prints the names of any synonyms in the database.
+.HI "INFO SYSTABLES"
+.br
+prints the information about the system catalog.
+.HI "INFO VIEWS"
+.br
+prints the names of any views in the database.
+.HI "INFO PROCEDURES"
+.br
+prints the names of any stored procedures in the database.
+.HI "INFO USERS"
+.br
+prints the names of any users who have been granted database permissions.
+.HI "INFO ROLES"
+.br
+prints the names of any roles which have been created.
+Roles are not part of 5.x servers, so INFO ROLES is not valid if you've
+compiled with 5.x ESQL/C.
+.HE
+.P
+\fISqlcmd\fP extends the \s-2INFO\s0 commands so that
+\s-2BASETABLES\s0, \s-2PROCEDURES\s0, \s-2ROLES\s0, \s-2SYNONYMS\s0,
+\s-2SYSTABLES\s0, \s-2TABLES\s0, \s-2USERS\s0, \s-2VIEWS\s0 all support
+an optional \s-2WHERE\s0 clause.
+This can be used to restrict the list of objects that you see.
+The columns in \fISysUsers\fP can be specified for \s-2ROLES\s0 and
+\s-2USERS\s0, optionally using the table alias `U'.
+The columns in \fISysProcedures\fP can be specified for
+\s-2PROCEDURES\s0, optionally using the table alias `P'.
+For the other commands, the columns in \fISysTables\fP can be specified,
+optionally using the table alias `T'.
+.P
+.HS
+.HI "INFO ACCESS FOR table"
+.br
+prints the access privileges for the table, including the references
+attribute (unlike the DB-Access version which uses \s-2INFO
+REFERENCES\s0 for this purpose).
+.HI "INFO PRIVILEGES FOR table"
+.br
+is a synonym for INFO ACCESS.
+.HI "INFO COLUMNS FOR table"
+prints the column number, name, type and length information for the table.
+.HI "INFO TRIGGERS FOR table"
+prints the trigger name, owner, and information about the type of
+trigger and the aliases (if any) for the old and new values.
+Although triggers were not introduced until version 5.01, the code
+assumes they are valid.
+If you are still using a 5.00 or earlier database, you have bigger
+problems than \s-2INFO TRIGGERS\s0 generating an unexpected error
+message.
+.HI "INFO FRAGMENTS FOR table"
+prints information the fragments used by the table, based on what
+DB-Access prints.
+The columns printed from \fISysFragments\fP are IndexName, Dbspace,
+FragType, ExprText, and Strategy.
+If there are no fragments for the table, it prints nothing without
+complaining about it.
+.HI "INFO REFERENCES BY table"
+prints the details about the foreign keys defined on the named table,
+identifying the tables and constraints which it references.
+.HI "INFO REFERENCES TO table"
+prints the details of the foreign keys which reference the named table,
+identifying the tables and constraints which reference it.
+.HI "INFO STATUS FOR table"
+prints the table number, name, owner, type, size of each row, the number
+of columns, the number of rows (likely to be inaccurate unless
+\s-2UPDATE STATISTICS\s0 was run recently), the number of indexes, the
+date when it was created (or last structurally modified), and the table
+version number.
+.HI "INFO PROCBODY FOR procedure"
+prints the stored text of the body of the stored procedure.
+The text is not rejoined, so the data has to be post-processed to
+produce a usable rendition of the stored procedure (in general).
+The segments are printed in order, but the segment number is included in
+the output.
+.HI "INFO TRIGBODY FOR trigger"
+prints the stored text of the body of the trigger definition.
+The text is not rejoined, so the data has to be post-processed to
+produce a usable rendition of the trigger statement.
+The segments are printed in order, but the segment number and datakey
+columns are included in the output.
+.HI "INFO VIEWBODY FOR view"
+prints the stored text of the body of the view definition.
+The text is not rejoined, so the data has to be post-processed to
+produce a usable rendition of the stored procedure (in general).
+The segments are printed in order, but the segment number is included in
+the output.
+.HE
+'\"
+'\" -----------------------------------------------------
+'\"
+.SH "BUILT-IN COMMANDS"
+In addition to the standard SQL statements, \fIsqlcmd\fP
+recognises a number of commands which are not part of the
+\s-2SQL\s0 language.
+These are sub-divided into groups for stopping the program, for
+handling I/O redirection, for handling other features of the
+context in which the database commands are executed,
+miscellaneous commands, and history file commands.
+.P
+All the built-in commands can be preceded by the `\*c@\*d'
+character, in which case there is no need to include a semicolon
+at the end of the command to indicate that it is complete.
+The internal commands are also recognised without the `\*c@\*d'
+prefix, but then the commands must be terminated by a semi-colon
+to indicate that the command is complete.
+From 2005-05-01, the '@' notation is deprecated.
+Support for it will be removed sometime after 2006-06-30.
+'\"
+'\" -----------------------------------------------------
+'\"
+.SH "HELP"
+.HS
+.HI help
+.HE
+.P
+The \fIhelp\fP command gives a summary of the available built-in
+commands.
+.P
+Future direction: \fIhelp\fP will take a sub-option that prints
+more information about the specified command.
+'\"
+'\" -----------------------------------------------------
+'\"
+.SH "STOPPING"
+.HS
+.HI quit
+.sp
+.HI exit
+.sp
+.HI bye
+.sp
+.HE
+.P
+These three commands terminate the program in exactly the same way.
+They are also abbreviated as \fIq\fP, \fIe\fP, \fIx\fP and \fIb\fP.
+(Support for `bye' is a hangover from Informix 3.30 (the pre-SQL
+database produced by RDS \(en Relational Database Systems Inc.), where
+programs such as \fBinformix\fP and \fBinformer\fP used `bye' as the
+exit command.)
+'\"
+'\" -----------------------------------------------------
+'\"
+.SH "I/O REDIRECTION"
+The i/o redirection commands are all optionally followed by a file
+name argument, which should be enclosed in quotes (either single or
+double).
+They also accept file names without quotes, but this misfeature may
+change.
+That file is then used as the source of input data or the sink for
+output or error data until the assignment is changed.
+.HS
+.HI input
+reads its input from the named file until the end of file is reached.
+These directives may be nested.
+Note that each new input statement starts a new context (see below).
+.HI output
+sends any output to the named file until the next output directive is
+encountered in the same input file or until the end of the input file.
+.HI error
+sends any error output to the named file until the next error
+directive is encountered in the same input file or until the end of
+the input file.
+.HE
+.P
+Input can be restored to standard input by entering the special name
+`\*c/dev/stdin\*d'.
+Some systems have this as a real device, but this program detects this
+name and uses the standard input regardless of whether the device
+actually exists.
+In the same way, the special names `\*c/dev/stdout\*d' and
+`\*c/dev/stderr\*d' refer to standard output and standard error.
+It is not advisable to try reading from \*c/dev/stdout\*/ or
+\*c/dev/stderr\*d, nor to try writing to \*c/dev/stdin\*d, but the
+program does not stop you from doing so, and it may even work.
+.P
+If no name is supplied to one of these commands, the current
+destination of the corresponding I/O channel is printed on the output
+channel.
+Note that if the output channel is not the standard output, this is
+not all that helpful, but consistency is important.
+'\"
+'\" -----------------------------------------------------
+'\"
+.SH "CONTEXT COMMANDS"
+Many of the context setting commands take an optional stack operator:
+.HS
+.HI trace
+takes a stack operator argument which adjusts the trace mode stack.
+.HI history
+takes a stack operator argument which adjusts the history mode stack.
+.HI continue
+takes a stack operator argument which adjusts the continue mode stack.
+.HI silence
+takes a stack operator argument which adjusts the silence mode stack.
+.HI heading
+takes a stack operator argument which adjusts the heading mode stack.
+.HI types
+takes a stack operator argument which adjusts the types mode stack.
+.HI verbose
+takes a stack operator argument which adjusts the verbose mode
+stack.
+.HI benchmark
+takes a stack operator argument which adjusts the benchmark mode
+stack.
+.HI format
+takes a stack operator argument which adjusts the format mode stack,
+or one of the values described for the `\*c-F\*d' option:
+\fIselect\fP, \fIunload\fP, \fIquote\fP, \fIcsv\fP, \fIfixed\fP or \fIXML\fP.
+.HE
+.P
+The valid stack operators are `\*con\*d', `\*coff\*d',
+`\*cpush\*d', `\*cpop\*d' and `\*ctoggle\*d'.
+If no stack operator is supplied, then the top of stack value is
+printed on the output file.
+All the stacks are 10 levels deep; overflow and underflow
+generate errors.
+.P
+Note that any operation on the benchmark mode stack also has the same
+effect on the trace mode stack (but the converse is not true).
+.P
+The other context setting commands do not take a stack operator:
+.HS
+.HI date
+takes an argument which will be used as the print format for dates.
+.HI delim
+sets the delimiter character.
+.HI quote
+sets the quote character.
+.HI escape
+sets the escape character.
+.HI eor
+sets the end of record character string.
+.HI qlimit
+sets the limit on the number of rows returned by a query.
+.HE
+.P
+The argument for `date' should be enclosed in quotes, especially if it
+contains spaces, but this is not enforced.
+.P
+Note that the `eor' string may be up to 7 characters long, and that it
+is a string and not just a character, unlike the delimiter, quote and
+escape characters.
+The default value is '\*c\en\*d'.
+.P
+If any of the context commands is invoked without any arguments, it will
+print the current value of the corresponding context parameter.
+.P
+These commands, combined with the I/O redirection commands, modify the
+context in which the \s-2SQL\s0 commands are executed.
+When an input file is opened, a new context is created, and it
+continues until the input file ends.
+The new context has the same prevailing values for all the properties
+above, except that there is only one state on any of the stacks.
+This means that an input file can adjust any or all of these
+parameters and will only affect the commands which it directly
+executes; it will not affect the context of the file which invoked the
+input file.
+'\"
+'\" -----------------------------------------------------
+'\"
+.SH "MISCELLANEOUS COMMANDS"
+.HS
+.HI time
+prints the current date and time on the output file.
+.HI dbnames
+prints the list of databases which could be selected on the
+output file.
+This command is deprecated; you should use the \s-2INFO DATABASES\s0
+command instead.
+.HI context
+prints the current context on the output file.
+.HI echo
+prints what follows on the line on the output file.
+.HI errmsg
+prints what follows on the line on the error file.
+.HI sleep
+takes an argument and sleeps for that many seconds.
+.HI version
+prints the version number on the output file.
+.HI sql
+always sends the command which follows to the database engine,
+even if it would otherwise be recognised as an internal command.
+This is used internally and is not intended for general use.
+.HI invalid
+produces an error message indicating that the command is invalid.
+This is used internally and is not intended for general use.
+.HI shell
+runs the command which follows as a shell command.
+This is used internally and is not intended for general use.
+.HE
+The \fIdbnames\fP command is not available if you use version 4.1x ESQL/C.
+'\"
+'\" -----------------------------------------------------
+'\"
+.SH "HISTORY COMMANDS"
+When the history mode is enabled, all the commands which are
+executed (except the history commands themselves) are stored
+in the history file, the name of which defaults to \*c./.sqlcmdlog\*d.
+This can be changed by the environment variable \s-2SQLCMDLOG\s0.
+This should be set to a file name (or at least, a seekable device);
+using \*c/dev/null\*d (and most other devices) is counter-productive.
+.P
+.HS
+.HI edit
+takes 0 to 2 numbers as arguments and runs an editor
+(specified by one of the environment variables
+\s-2DBEDIT\s0 or \s-2VISUAL\s0 or \s-2EDITOR\s0 and
+defaulting to \fBvi\fP if none of these are set) on the
+commands specified by the numbers.
+The commands in the edited file are re-executed.
+This command is also known as \fIv\fP, \fIvi\fP and \fIview\fP.
+.HI list
+takes 0 to 2 numbers as arguments and lists the corresponding
+commands on the output file.
+This command is also abbreviated as \fIl\fP.
+.HI rerun
+takes 0 to 2 numbers as arguments and reruns the corresponding commands.
+This command is also abbreviated as \fIr\fP.
+.HI adjust
+takes an argument which changes the size of the history list
+which is maintained.
+.HI erase
+takes 0 to 2 numbers as arguments and erases the history record for
+those command numbers (they now showing as empty).
+This command is also abbreviated as \fId\fP.
+(The command name of choice would be `delete', but SQL got there first;
+the abbreviation would `e' but the edit command uses that.)
+.HE
+.P
+The command numbers can be specified in either of two ways.
+Positive numbers larger than zero refer to the absolute command
+number, which is printed as part of the prompt.
+Negative numbers refer to preceding commands.
+Zero refers to the immediately preceding command.
+If no numbers are specified, the previous command is listed (or
+edited or rerun).
+If one number is specified, that command is listed; if two
+numbers are specified, they refer to a range of commands.
+The range of commands always consists of at least one command,
+even if the second command is earlier than the first.
+.P
+The \fIlist\fP, \fIedit\fP and \fIrerun\fP commands are special
+in that they are not recorded in the history file.
+Also, when commands are \fIrerun\fP (possibly after an \fIedit\fP
+command), they are executed in a new context.
+This has the unexpected side-effect (or, rather, lack of
+side-effect) that you cannot adjust the current context
+using either \fIrerun\fP or \fIedit\fP, though any context
+changes made in the rerun commands will affect the other commands
+executed in the \fIrerun\fP context.
+.P
+When the history file is adjusted and increased in size, no
+commands are lost (though since the adjust record is written
+before it is acted upon, it may cause the oldest command to
+be overwritten); when the history file is shrunk, the
+original file is truncated and rebuilt.
+The history mechanism is carefully designed to keep the file as
+short as possible.
+It keeps a record of where the current set of commands are stored
+in the file and where there is unused space, and it reuses the
+space whenever it can; the file only grows when there is no chunk
+of free space as big as the command that needs to be stored.
+The header section of the file describes how big the used and
+free lists are, and the current command number.
+'\"
+'\" -----------------------------------------------------
+'\"
+.SH SQLUNLOAD
+The program \fBsqlunload\fP is the inverse of \fIsqlreload\fP.
+It extracts data from the database and produces
+\s-2ASCII\s0 output records suitable for use by \fBdbload\fP
+or the \s-2LOAD\s0 statement in \s-2SQL\s0.
+The database and table are always
+specified on the command line (using the `\*c-d\*d' and `\*c-t\*d' flags).
+The optional argument `\*c-o\*d' followed by a file name can be
+used to specify where the output should go; otherwise, it will go
+to standard output.
+The optional argument `\*c-O\*d' followed by the ordering columns for an
+ORDER BY clause will be added to the generated \s-2SELECT\s0 statement
+to provide sorted output.
+The `\*c-A\*d', `\*c-B\*d', `\*c-D\*d', `\*c-E\*d', `\*c-F\*d', `\*c-G\*d', `\*c-Q\*d',
+`\*c-c\*d', `\*c-x\*d', and `\*c-s\*d' options are honoured.
+.P
+All the data in the table is selected in arbitrary order.
+If you require better control because you want only a subset of
+the columns or you want the data to appear in a particular order,
+use an \s-2UNLOAD\s0 statement with an appropriate \s-2SELECT\s0.
+.P
+If some data was unloaded with \fIsqlunload\fP,
+\fIsqlreload\fP would load the data if it is given the
+corresponding argument list.
+'\"
+'\" -----------------------------------------------------
+'\"
+.SH SQLRELOAD
+The program \fBsqlreload\fP is the inverse of \fIsqlunload\fP, and it has
+some passing resemblance to the Informix program \fIdbload\fP.
+It loads data from an \s-2ASCII\s0 file and inserts it into
+the nominated table.
+The database and table must always be specified (using the
+`\*c-d\*d' and `\*c-t\*d' flags).
+The optional argument `\*c-i\*d' followed by a file name can be
+used to specify where the input should come from; otherwise, it will be
+taken from standard input.
+The `\*c-A\*d', `\*c-B\*d', `\*c-D\*d', `\*c-E\*d', `\*c-F\*d', `\*c-Q\*d',
+`\*c-c\*d', `\*c-x\*d', `\*s-S\*d' and `\*c-s\*d' options are honoured.
+.P
+Both \fIsqlreload\fP and \fIdbload\fP handle databases with
+and without transaction logs automatically.
+Both programs automatically partition a load into
+subsections to keep the size of a transaction to a minimum.
+The `\*c-N\*d' option is used by \fIsqlreload\fP or the RELOAD
+statement; it specifies the size of transaction in which the rows are
+loaded into the database.
+The default size is 1024 rows.
+To suppress intermediate transactions, set the number bigger than the
+number of rows to be loaded; the value should not be larger than
+2,147,483,647.
+When a transaction is committed, the number of rows committed so far is
+reported on the standard output unless the `\*c-s\*d' flag was
+specified.
+.P
+The `\*c-S\*d' option takes the number of records (not lines
+of data) to skip before starting to insert data.
+This can be useful in a couple of situations.
+The first is when you are using CSV data and the first line
+contains the column names.
+The other is when a load partially succeeds but fails after
+a significant number of lines have been inserted.
+You can then indicate how many records to omit before
+starting the load.
+.P
+The \s-2LOAD\s0 statement always uses an insert cursor; if the
+database has a transaction log, the \s-2LOAD\s0 statement must be
+executed within a transaction.
+When you use \fIsqlreload\fP, it automatically inserts
+transactions, but if the \s-2LOAD\s0 statement is encountered by
+\fIsqlcmd\fP, the user must supply a transaction explicitly.
+There is no mechanism for using sub-transactions as there is with
+\fBsqlreload\fP.
+.P
+It is important to understand when to use \fIsqlreload\fP
+and when to use \fIdbload\fP.
+\fISqlreload\fP is much easier to use in the standard
+situation where data which has been unloaded from a table
+needs to be reloaded into the same table, or a table with
+the same structure in a different database.
+On the other hand, if the data comes in a fixed format
+layout, \fIdbload\fP can handle the insertion of that data
+with intermediate processing, and it can also reorder the
+columns (it can associate the sizth column of the input with
+the third column in the table and so on).
+\fIDbload\fP also has much better error control.
+It can be programmed to abort after a number of errors,
+rather than on the first as \fIsqlreload\fP does.
+.P
+If some data was unloaded with \fIsqlunload\fP, \fIsqlreload\fP
+will load the data from the output file if it is given the
+corresponding argument list.
+.P
+If you need to load data from a fixed format file or reformat it
+to add explicit decimal points in data with implicit decimal
+points, or if you need to reformat date or time data so that
+Informix will recognize it, you should consider using
+\fBdbldfmt\fP to revise the data before loading the revised data
+with \fBsqlreload\fP.
+There are also programs available which insert record delimiters
+(newlines) into data files with no record delimiters and other similar
+conversion tools.
+Also, you can investigate the High-Performance Loader for some
+other data conversions, including handling EBCDIC data.
+'\"
+'\" -----------------------------------------------------
+'\"
+.SH "SQLREAD"
+The \fIsqlread\fP executable is designed to permit read-only operations
+but prevent any operations that modify the database.
+Otherwise, it is similar to \fIsqlcmd\fP, and all the command-line
+options of \fIsqlcmd\fP apply to \fIsqlread\fP except those that imply
+modifying the database (for example, `\*c-R\*d' is not permitted because
+reloading modifies the database).
+It allows SELECT statements (including SELECT INTO TEMP).
+It allows most of the SET statements.
+It allows the UNLOAD statement.
+It allows the connection management statements.
+All other SQL statements are disallowed.
+(For the sordid details, inspect the code in \*cinternal.c\*d.)
+'\"
+'\" -----------------------------------------------------
+'\"
+.SH "SQLSERVER AND SQLCLIENT"
+The shell script \fBsqlserver\fP shows how \fIsqlcmd\fP can be
+used in monitor mode.
+It sets \fIsqlcmd\fP running in the background monitoring a
+\s-2FIFO\s0 (by default, `\*c/tmp/sqlcmd.in\*d').
+Normally, it will be started with a \s-2FIFO\s0 named by the
+environment variable \s-2SQLCMDFIFO\s0, and it will be started
+with a named database via the `\*c-d\*d' option.
+.P
+The shell script \fBsqlclient\fP (which is normally renamed
+\fBsql\fP) shows how the monitor mode can be used at the
+user level, and also illustrates the use of
+input, output, and error directives.
+This script sends a message to the \fIsqlserver\fP process
+and waits to read a response and echoes the reponse to the user.
+.P
+This pair of programs demonstrates the idea behind the monitor option.
+It means that the overhead of connecting to the database
+server is replaced by the overhead of creating a \s-2FIFO\s0 (for
+the standard output), which should be smaller.
+However, there are some problems with \fIsqlserver\fP
+if several people on the same machine try to use it at the same
+time, because everyone uses the same \s-2FIFO\s0.
+.P
+The \fBnewclient\fP script is intended for use in the
+multi-user environment, because it sets the
+\s-2SQLCMDFIFO\s0 environment variable to a program-specific
+value before it executes the \fIsqlserver\fP program.
+This prevents two different users from using the same \s-2FIFO\s0.
+The \fInewclient\fP script is executed using:
+.eS
+\&. newserver
+.eE
+'\"
+'\" -----------------------------------------------------
+'\"
+.SH "ENVIRONMENT VARIABLES"
+The standard Informix environment variables \s-2DBPATH\s0,
+\s-2DBDATE\s0, \s-2DBDELIMITER\s0, \s-2DBEDIT\s0,
+\s-2INFORMIXDIR\s0, \s-2SQLEXEC\s0, \s-2SQLRM\s0,
+\s-2SQLRMDIR\s0, \s-2TBCONFIG\s0, \s-2INFORMIXSERVER\s0,
+\s-2INFORMIXSQLHOSTS\s0 are honoured automatically.
+\s-2ONCONFIG\s0 is not listed because it is only used by
+ON-Monitor and the OnLine administration programs, not by
+\s-2ESQL/C\s0 programs such as \fBsqlcmd\fP; it is somewhat
+debatable whether \s-2TBCONFIG\s0 is actually used by any
+\s-2ESQL/C\s0 code.
+The variable \s-2SQLEXEC\s0 is only recognized by version 4 or 5
+\s-2ESQL/C\s0; the variables \s-2SQLRM\s0 and \s-2SQLRMDIR\s0 are
+only recognized by version 5 \s-2ESQL/C\s0.
+.P
+The environment variable \s-2SQLCMDLOG\s0 specifies the name of
+the history file, which defaults to `\*c./.sqlcmdlog\*d'.
+.P
+The environment variables \s-2DBEDIT\s0, \s-2VISUAL\s0,
+\s-2EDITOR\s0 are used to determine the editor to run.
+.P
+The environment variables \s-2DBESCAPE\s0 and \s-2DBQUOTE\s0 are
+recognized as default values for the escape (\*c-E\*d) and quote
+(\*c-Q\*d) characters.
+.P
+The environment variable \s-2DBTEMP\s0 is used as the
+location of blob files when blobs are stored in files; if
+\s-2DBTEMP\s0 is not defined, \s-2TMPDIR\s0 is used, and if \s-2TMPDIR\s0 is not
+used either, the compile time constant DEF_TMPDIR is used,
+which is normally `\*c/tmp\*d'.
+'\"
+'\" -----------------------------------------------------
+'\"
+.SH DIAGNOSTICS
+Exit status is 0 if successful, 1 if it failed for any reason.
+'\"
+'\" -----------------------------------------------------
+'\"
+.SH "SEE ALSO"
+Informix Guide to SQL (Reference and Tutorial).
+Also the manuals for Informix-ESQL/C, Informix-SQL, Informix-4GL,
+Informix-OnLine, Informix-SE, and the more recent variants of
+these products.
+.P
+dbldfmt(1)
+'\"
+'\" -----------------------------------------------------
+'\"
+.SH MISSING SQL STATEMENTS
+The \s-2CHECK TABLE\s0 and \s-2REPAIR TABLE\s0 statements are not
+supported at all, and there is no intention of ever providing
+them.
+The \s-2OUTPUT\s0 statement in \fBsqlcmd\fP has a completely
+different syntax from the \s-2OUTPUT\s0 statement of ISQL or
+DB-Access, but it is more powerful than the standard version.
+See the section on `I/O Redirection' above for more information. 
+'\"
+'\" -----------------------------------------------------
+'\"
+.SH BUGS
+Probably; let me know about any that you find.
+If possible, send the output from `\*cwhat sqlcmd\*d' and a
+script which demonstrates the error, including, if necessary, the
+schema and data for the test database.
+.P
+The current version does not verify that the date format string
+can be used to format a date sensibly.
+.P
+The current version does not use \s-2DBMONEY\s0 to format
+\s-2MONEY\s0 values.
+.P
+This version of \fBsqlcmd\fP does not recognize \s-2DBTIME\s0
+(and neither will any planned future version of \fBsqlcmd\fP
+recognize it) because the environment variable is useless.
+A single environment variable cannot format all possible
+sub-types of \s-2DATETIME\s0.
+For example, the same format cannot be used for \s-2DATETIME YEAR
+TO DAY\s0 and for \s-2DATETIME HOUR TO FRACTION(5)\s0!
+.P
+Some of the command analysis code is disgracefully \fIad hoc\fP.
+The only excuse is that it works.
+Given that there is now a \*cyacc\*d grammar in the program for
+identifying the connection management and info statements, it would be
+possible to revise the command analysis code to make more use of
+a more extensive grammar.
+The code could also be improved by making more extensive use of
+the new \*csqltoken()\*d function which deals with SQL parsing
+much more cleanly than the existing code does.
+.P
+The \s-2INFO\s0 command in DB-Access produces prettier output.
+For instance, special formatting should be applied to convert the
+column type information into the correct type name.
+.P
+The code does not recognize all the Informix Universal Server
+(Informix Dynamic Server Universal Data Option) data types.
+It does, however, recognize the new standard types (\s-2LVARCHAR\s0,
+\s-2BOOLEAN\s0, \s-2INT8\s0, \s-2SERIAL8\s0, \s-2BIGINT\s0, and
+\s-2BIGSERIAL\s0).
+Its support for the compound types (LIST, SET, MULTISET, ROW types)
+and user-defined types is hit-or-miss.
+(If you don't like what it does, by all means send a patch.
+If you can't send a patch, at least send a problem report, but patches
+will be turned around quicker than problem reports \(em the problem
+reports are more than a decade old.
+This is open source; people fix the problems that cause them grief.)
+.P
+The debugging options '\*c-Z\*d' and '\*z-z\*d' are primarily to
+help the maintenance team; ordinary users should seldom have need
+to use them.
+The syntax of these options may change at any time without
+notice; do not use them in production scripts.
+The `\*c-Z\*d' option takes an integer argument which represents
+a debug level.
+Higher numbers produce more verbose output (try 3 or 10).
+It should normally be the first argument; it won't be applied
+until it occurs in the argument list, so you could miss out on a
+lot of information if it appears later in the argument list.
+The `\*c-z\*d' option also takes an integer argument which
+represents a debug level.
+It is used to enable debugging information from the syntax
+analysis and lexical analysis code.
+The program has to be compiled correctly to make these options
+operational.
+The likely change is to permit sub-options such as `\*c-Z
+load=3,unload=5,syntax=1,lexical=2\*d'.
+.P
+The undocumented option '\*c-W\*d' is only partially
+implemented; it is recognized on the command line, can be
+set and unset using the command \s-2BLOBDIR\s0, and is
+reported by the context mechanism, but it is not used by the
+\s-2LOAD\s0, \s-2UNLOAD\s0 or \s-2RELOAD\s0 statements
+themselves.
+When implemented, a load file will contain filenames instead
+of blob data, and the \s-2LOAD\s0 statement will collect the
+blob data from files in the directory specified by the
+`\*c-W\*d' option and the \s-2UNLOAD\s0 will write blob data
+to files in that directory.
+See the \*cselmultiblob.ec\*d code for an example of how it might be used.
+The syntax for the \s-2LOAD\s0 and \s-2UNLOAD\s0 commands will be extended
+to specify the directory where blobs should be created; the
+`\*c-W\*d' option would only be a fallback.
+'\"
+'\" -----------------------------------------------------
+'\"
+.SH "READLINE SUPPORT"
+If your system has both the curses library and the GNU
+Readline library available, then readline will be enabled in
+your build.
+With readline support, what you type can be edited.
+This is disjoint from, though closely related to, the history
+mechanism in SQLCMD.
+History continues to work, and can be used to retrieve information
+from previous sessions; readline only allows you to edit information
+from the current session.
+Further, if you use a rerun or edit command, readline only gives
+you the rerun or edit command to work on; the history mechanism
+gives you the resulting SQL.
+See also the INSTALL file.
+.P
+The basic readline support was implemented by Benjamin Kahn
+<xkahn@cybersites.com>; thank you very much, Benjamin.
+'\"
+'\" -----------------------------------------------------
+'\"
+.SH "WINDOWS NT"
+The Windows NT build should work but you must keep the warning
+level at a minimum unless you fix the ESQL/C headers (sqlhdr.h
+specifically) so that it does not foul up the use of const.
+.P
+Unless you know otherwise, Autoconf does not work on NT, so you
+get a preconfigured system in the WinNT directory.
+If you know how to Autoconf on Windows NT, please report
+what is required.
+.P
+There is no readline support on NT.
+Again, if you know that it can be made available, please report
+what is required.
+'\"
+'\" -----------------------------------------------------
+'\"
+.SH CREDITS
+As well as Benjamin Kahn, who provided the readline support, Art Kagel
+gets credit for thinking of and requesting \fIsqlread\fP, and Tom Girsch
+gets for thinking of and requesting \fIdbaccess\fP mode.
+Many people have contributed bug reports over the years; most such
+people should be cited in the ChangeLog (and it is an oversight if I
+missed you out - let me know and it shall be fixed).
+'\"
+'\" -----------------------------------------------------
+'\"
+.SH VERSIONS
+The current version number for these programs is:
+.br
+SQLCMD Version 90.02 (2016-07-28)
+'\"
+'\" -----------------------------------------------------
+'\"
+.SH AUTHOR
+Jonathan Leffler
+.br
+JLSS
+.br
+18th April 2008

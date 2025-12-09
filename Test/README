@@ -1,0 +1,33 @@
+Testing SQLCMD
+==============
+
+SQLCMD Test Tools (STT)
+
+Objectives
+----------
+
+1.  The test suite should emulate the Perl test suite for quietness.
+2.  Each test script should be self-contained.
+3.  Each test script should define expected output and should compare
+    the actual output with the expected output.
+4.  Each test should unambiguously pass or fail.
+5.  Many environment variables need to be controlled carefully.
+    *   SQLCMDLOG
+    *   DBDATE
+    *   PATH
+6.  There must be a 'clean' target to remove test debris.
+7.  Objective 1 probably means that MAKE will not be used to run the
+    tests in the long run -- GNU Make is very verbose when multiple
+    directories are involved.  Or we'll actually use the .SILENT
+    directive for the first time ever!
+8.  Use stt_test to run component tests - it handles most of the work
+    cleanly.  It certainly made a huge difference to the existing tests
+    when it was applied to, say, t04lvarchar.sh.  Actually, it made the
+    difference between "this whole testing scheme stinks - that's a
+    technical term" and "this test infrastructure may not be perfect,
+    but at least gives a reasonable set of results for systematically
+    written tests".
+
+------------------------------------------------------------------------
+
+@(#)$Id: README,v 1.4 2008/07/14 05:33:37 jleffler Exp $

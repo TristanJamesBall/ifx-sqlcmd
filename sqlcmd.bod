@@ -1,0 +1,44 @@
+#   @(#)$Id: sqlcmd.bod,v 2015.1 2015/11/09 01:40:34 jleffler Exp $
+#   @(#)SQLCMD Version 90.02 (2016-07-28)
+#   @(#)Definitive list of files -- Binary-Only Distribution
+#
+#   -- The Distributed file column contains the name of a file in
+#      the distribution directory.
+#   -- The Compiled file column contains the name of the file in the
+#      working directory.
+#
+#   -- Note that it is possible to rename files using this mechanism.
+#
+#   -- Note that it is possible to include variable definitions as in a
+#      shell script.  If necessary, these can include defaults such as
+#      ${JH:-/u/j/h} but not termination constructs such as: ${XYZ:?}
+#      Note that spaces are not allowed in definitions.
+#
+#   -- Comment lines start with a hash (#)
+#   -- Blank lines are ignored
+#   -- Tabs are non-preferred characters
+##################################################################
+
+##################################################################
+# Distributed file          Compiled file                        #
+##################################################################
+
+jlss                        jlss
+
+bin/histdump                histdump
+bin/mkproc                  mkproc
+bin/newserver               newserver
+bin/sqlclean                sqlclean
+bin/sqlclient               sqlclient
+bin/sqlcmd                  sqlcmd
+bin/sqlserver               sqlserver
+bin/sqlupload               sqlupload
+
+share/man/man1/mkproc.1     mkproc.1
+share/man/man1/sqlclean.1   sqlclean.1
+share/man/man1/sqlcmd.1     sqlcmd.1
+share/man/man1/sqlserver.1  sqlserver.1
+share/man/man1/sqlupload.1  sqlupload.1
+
+etc/sqlcmd.ins              sqlcmd.ins
+etc/sqlcmd.lst              sqlcmd.lst

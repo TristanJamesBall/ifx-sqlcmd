@@ -1,0 +1,95 @@
+#   @(#)$Id: sqlcmd.lst,v 2015.1 2015/11/09 01:40:34 jleffler Exp $
+#   @(#)SQLCMD Version 90.02 (2016-07-28)
+#   @(#)Definitive list of files -- Installed Software
+#
+#   -- The installed file column contains the name of the file to be
+#      installed.  The name is quoted relative to the base directory.
+#      The name could also be prefixed with an environment variable
+#      which would be set by the installation script.
+#
+#   -- The type of file indicates what sort of file is to be installed.
+#   -- The type "file" means an ordinary file.
+#   -- The type "directory" means that the file is the name of a
+#      directory which must exist when the software is installed.
+#      The installation program will create the directory
+#      if it does not already exist.  The directory entry must come before
+#      the first file entry which lives in the directory.
+#   -- The type "deleted" means that this file used to exist in a previous
+#      release of the software and is no longer relevant.  The file will
+#      be removed from the installed system.  It can also be used to clean
+#      up after the installation process.
+#   -- The type "link" means that the installed file is a link to a file
+#      already installed.  The name in the Link column is the name of the
+#      file which the file is to be linked to.
+#      This file must already exist.  
+#   -- The type "symlink" means that the installed file is a link to a file
+#      already installed.  The name in the Link column is the name of the
+#      file which the file is to be linked to.
+#   -- The type "exec" means that the installed file is executed.  If the
+#      link field is not '-', then it is passed to the program as its sole
+#      argument.  The configuration file (sqlcmd.ins) should have set any
+#      extra environment variables needed.  Note that the installed file
+#      must be executable.
+#   -- The type "config" means that the file will be configure by the
+#      script specified in the 'link' field.  Intended use: configuring
+#      shell script for installation in $HOME/bin that refers to
+#      software installed somewhere else without requiring the user to
+#      add a new directory to their path.
+#   -- The types "mapfile", "maplink", and "mapsym" mean that the file
+#      and link names may optionally be mapped with a suffix provided by
+#      the user.  The intended use is to permit a .32 or .64 suffix to
+#      be added to executables that may be multiply installed with
+#      32-bit or 64-bit versions.
+#   -- The type "condfile" means that the file should be installed if
+#      present but it is not an error if it is absent.  Otherwise, the
+#      same as a file.
+#
+#   -- Permissions are the file permissions to be set on the file.
+#      The three subfields are owner, group, mode.
+#      The owner - is used to indicate the default owner for the file.
+#      The group - is used to indicate the default group for the file.
+#      Other owner/group values are treated as literal values.  The
+#      default owner and group are the current user and group (the one
+#      running the install), but that can be overridden on the command
+#      line.  Other user or group names should be known to exist; the
+#      sqlcmd.ins file can check this.
+#
+#   -- Comment lines start with a hash (#)
+#   -- Blank lines are ignored
+#   -- Tabs are non-preferred characters
+#
+# Installed file        Type            Link            Permissions
+
+# Main distributed materials
+.                       directory       -               -       -       755
+./jlss                  file            -               -       -       544
+
+bin                     directory       -               -       -       755
+bin/histdump            mapfile         -               -       -       755
+bin/mkproc              mapfile         -               -       -       755
+bin/newserver           file            -               -       -       755
+bin/sqlclean            file            -               -       -       755
+bin/sqlreset            link            bin/sqlclean    -       -       755
+bin/sqlclient           file            -               -       -       755
+bin/sqlcmd              mapfile         -               -       -       755
+bin/sqlreload           maplink         bin/sqlcmd      -       -       755
+bin/sqlunload           maplink         bin/sqlcmd      -       -       755
+bin/sqlupload           mapfile         -               -       -       755
+bin/sqlserver           file            -               -       -       755
+bin/sql                 link            bin/sqlclient   -       -       755
+
+share                         directory       -               -       -       755
+share/man                     directory       -               -       -       755
+share/man/man1                directory       -               -       -       755
+share/man/man1/mkproc.1       file            -               -       -       444
+share/man/man1/sqlclean.1     file            -               -       -       444
+share/man/man1/sqlcmd.1       file            -               -       -       444
+share/man/man1/sqlserver.1    file            -               -       -       444
+share/man/man1/sqlupload.1    file            -               -       -       444
+
+# Installation Tools -- jlss to be listed last
+etc                     directory       -               -       -       755
+etc/jlss                link            ./jlss          -       -       544
+etc/sqlcmd.ins          file            -               -       -       444
+etc/sqlcmd.lst          file            -               -       -       444
+./jlss                  deleted         -               -       -       544

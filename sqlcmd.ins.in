@@ -1,0 +1,62 @@
+# "@(#)$Id: sqlcmd.ins.in,v 2015.1 2015/11/09 01:40:34 jleffler Exp $"
+#
+# SQLCMD Version 90.02 (2016-07-28)
+#
+# Installation configuration file
+
+envdir=SQLCMDDIR
+defdir=@prefix@
+envusr=SQLCMDUSR
+defusr=installer
+envgrp=SQLCMDGRP
+defgrp=installer
+envtmp=SQLCMDTMP
+deftmp=${TMPDIR:-/tmp}/sqlcmd
+envsfx=SQLCMDSFX
+defsfx=""
+
+FILELIST=etc/sqlcmd.lst
+PRODUCT='SQLCMD Version 90.02 (2016-07-28)'
+
+#################################################
+
+IN_MSG='
+echo "   Base Directory: $envdir = $DIR"
+echo "   Owner:          $envusr = $USR"
+echo "   Group:          $envgrp = $GRP"
+[ -n "$SFX" ] &&
+echo "   Suffix:         $envsfx = $SFX"
+echo ""
+echo "The executables   will go in $envdir/bin"
+echo "The documentation will go in $envdir/share/man/man1"
+echo "The other files   will go in $envdir/etc"
+'
+
+IN_TRAP="
+echo 'Set: $envdir to define the location of the programs'
+echo '     $envusr to define the owner'
+echo '     $envgrp to define the group'
+echo '     $envsfx to define the suffix'
+trap 0
+exit 1"
+
+RM_MSG='
+echo "   Base Directory: $envdir = $DIR"
+echo "   Owner:          $envusr = $USR"
+echo "   Group:          $envgrp = $GRP"
+[ -n "$SFX" ] &&
+echo "   Suffix:         $envsfx = $SFX"
+echo ""
+echo "The executables   were placed in $envdir/bin"
+echo "The documentation were placed in $envdir/share/man/man1"
+echo "The other files   were placed in $envdir/etc"
+'
+
+RM_TRAP="
+echo 'Set: $envdir to define the location of the programs'
+echo '     $envusr to define the owner'
+echo '     $envgrp to define the group'
+echo '     $envtmp to define where the files are to be moved to'
+echo '     $envsfx to define the suffix applied to the files'
+trap 0
+exit 1"

@@ -1,0 +1,37 @@
+
+#!/bin/bash
+
+opt_L="-L 5000"
+opt_d="-d openbet"
+opt_H="-H"
+
+while getopts ":L:d:H:" o; do
+    case "${o}" in
+        d)
+            opt_d=${OPTARG}
+            ;;
+        L)
+            if [[ ${OPTARG} == - ]] || [[ $OPTARG == 0 ]]; then
+                unset opt_l
+            else
+                opt_L="-L ${OPTARG}"
+            fi
+            ;;
+        H)
+            if [[ ${OPTARG} == - ]] || [[ $OPTARG == 'off' ]]; then
+                unset opt_H
+            fi
+            ;;
+
+    esac
+done
+shift $((OPTIND-1))
+
+if [[ -t 1 ]]; then
+    # output to console
+    INFORMIXDIR=/opt/informix/csdk sqlcmd -F CSV -D$'\037' $opt_d $opt_H $opt_L "$@" | pspg --csv --csv-separator $'\037' --style 23 --highlight-odd-rec  --vertical-cursor
+else
+    # output to pipe
+    INFORMIXDIR=/opt/informix/csdk sqlcmd -F CSV -D$'\037' $opt_d $opt_H $opt_L "$@"| pspg --csv --csv-separator $'\037'  --csv-header off --border 1  |egrep -v '[(][0-9]+ rows[)]'
+fi
+

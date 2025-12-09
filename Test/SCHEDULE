@@ -1,0 +1,90 @@
+
+            ###################################################
+            #  REQUIRED TESTS FOR SQLCMD/SQLUNLOAD/SQLRELOAD  #
+            ###################################################
+
+1.	ARGUMENTS
+	-- SQLCMD:
+	Accepted: -c -h -s -x -d -f -e -D -E -Q -F -A -H -I -T -V -M
+	Rejected: -i -o -N -t
+	-- SQLRELOAD:
+	Accepted: -c -h -s -x -d -D -E -Q -F -A -H -T -V -i -N -t
+	Rejected: -e -f -o -I -M
+	-- SQLRELOAD:
+	Accepted: -c -h -s -x -d -D -E -Q -F -A -H -T -V -o -N -t
+	Rejected: -e -f -i -I -M
+
+2.	BASIC SQL STATEMENTS
+	-- Creating tables.
+	-- Inserting data.
+	-- Deleting data.
+	-- Updating data.
+	-- Permissions.
+
+3.	SELECTING DATA
+	-- All data types
+	-- With header, types, headers & types
+	-- All formats
+
+4.	UNLOADING DATA
+	-- SQLCMD
+	UNLOAD statement
+	Without and with column lists
+	-- SQLUNLOAD
+	Command line only
+
+5.	RELOADING DATA
+	-- SQLCMD
+	LOAD statement
+	-- SQLRELOAD
+	Command line only
+
+6.	BUILT-IN COMMANDS
+	-- Recognises and executes:
+		adjust
+		bye
+		context
+		continue
+		date
+		dbnames
+		delim
+		echo
+		error
+		escape
+		exit
+		format
+		heading
+		history
+		input
+		output
+		quit
+		quote
+		silence
+		sleep
+		sqlexit
+		sqlstart
+		time
+		trace
+		types
+		version
+
+7.	MONITOR MODE
+	-- SQLCMD
+	-- SQLSERVER
+	-- NEWSERVER
+	-- SQLCLIENT
+
+8.	HISTORY
+	-- Recognises invalid history
+	-- Recognises $SQLCMDLOG
+	-- Correct behaviour of rerun, list, edit.
+	-- Abbreviations: r, l, e, v
+
+9.	ERROR RECOVERY
+	-- Missing things specified on command line: -f, -d
+	-- Syntax errors etc. in command line arguments: with/without -c specified
+	-- Syntax errors etc. in standard input.
+	-- Syntax errors etc. in nested input.  (With/without -c specified).
+	-- Interrupt handling
+
+@(#)$Id: SCHEDULE,v 1.2 1992/10/13 05:43:40 jl Exp $

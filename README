@@ -1,0 +1,92 @@
+README file for SQLCMD Version 90.02 (2016-07-28)
+
+===========================================================================
+
+The SQLCMD suite of tools provides a number of programs for manipulating
+Informix databases.
+
+The primary download site is the International Informix User's Group
+Software Archive (http://www.iiug.org/software); membership is required
+but it is free.
+
+What is SQLCMD?
+===============
+
+SQLCMD is an SQL Command Interpreter for Informix databases.  It is
+analogous to the Query-Language option of DB-Access or ISQL, but it is
+designed to work better in shell scripts.  It has a number of features
+not available in DB-Access.  The only advantage DB-Access has over
+SQLCMD is the screen-mode (curses-based) interface.  On the other hand,
+one of SQLCMD's principal advantages is precisely that it is not
+constrained by a curses-based interface.
+
+SQLCMD is written in ESQL/C.  It works with (or is supposed to work
+with) any version of ESQL/C from 5.00 (circa 1990) upwards.  You will
+need a copy of ESQL/C (probably as part of Client SDK or CSDK) on the
+machine where you build SQLCMD, and you will need either ESQL/C (meaning
+CSDK) or I-Connect on the machine where it is run.
+
+You should be able to obtain CSDK from either IBM or the IIUG:
+* http://www.ibm.com/software/data/informix
+* http://www.iiug.org
+
+SQLCMD has a history mechanism that allows you to review, edit and rerun
+commands you ran previously.
+
+SQLCMD will use the GNU readline library if it is installed on your
+machine.  This allows you to edit the command you are typing, or to find
+commands you ran previously and rerun them, possibly after editing them.
+
+===========================================================================
+
+This version also provides a prototype version of SQLUPLOAD, which is used
+to insert or update data depending on whether there is a record to update
+or not.  See the manual page (sqlupload.1) for more information.  Note that
+as a prototype, it can have stray diagnostics, not every documented
+feature necessarily works, and there could be bugs in it.  Please report
+bugs or questionable behaviour.
+
+You also get some other more or less useful programs, including:
+    * updblob  -- update blob from file
+    * mkproc   -- execute SQL statements with CREATE PROCEDURE FROM
+    * histdump -- print SQL commands recorded in SQLCMD history file
+
+===========================================================================
+
+See the INSTALL file for instructions on how to build this.
+
+===========================================================================
+
+LICENCE
+-------
+
+This version of the code is distributed under the GNU General Public
+Licence version 2 (see the file LICENCE), and is only distributed under
+that version - it is not valid to apply any other version of the GNU
+General Public Licence to this code.  If the conditions of the GPL are
+too onerous for you, contact me and we can discuss alternative licences.
+
+The master versions of the GPL and LGPL can be found at the GNU or Free
+Software Foundation web sites:
+    http://www.gnu.org/licenses/licenses.html
+    http://www.fsf.org/licenses/licenses.html
+
+===========================================================================
+
+DISCLAIMER
+----------
+
+This product is not supplied by IBM (nor Informix Software) and is
+therefore not supported by IBM (nor Informix).  Do NOT call IBM/Informix
+Technical Support for help.  To obtain help with it, you can post a
+request to comp.databases.informix (or email to informix-list@iiug.org),
+but you can also email me directly at the address below.  Please include
+the word SQLCMD (in capitals) in the subject line of the email.  Thanks!
+
+===========================================================================
+
+AUTHOR
+
+Jonathan Leffler (j.leffler@acm.org)
+
+@(#)$Id: README,v 2007.2 2007/09/03 03:50:57 jleffler Exp $

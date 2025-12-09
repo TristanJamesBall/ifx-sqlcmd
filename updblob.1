@@ -1,0 +1,65 @@
+.\" @(#)$Id: updblob.1,v 2004.1 2004/10/14 22:35:31 jleffler Exp $
+.\" @(#)Manual page: UPDBLOB -- Blob Manipulation Example
+.ds fC "Version: $Revision: 2004.1 $ ($Date: 2004/10/14 22:35:31 $)
+.TH UPDBLOB 1J "JLSS Informix Tools"
+.SH NAME
+updblob \(em Update a single blob field from a file
+.SH SYNOPSIS
+\fBupdblob\fP [-Vnx] -d dbase [-u username -p password] -t table -c blobcolumn \e
+.br
+	-k column=value [-k col=val ...] [-f] blobfile
+.SH DESCRIPTION
+\fBUpdblob\fP updates a table in the database so that a particular
+file is inserted into a blob (BYTE or TEXT) column of a pre-existing
+row in the table which is identified by the combination of key column
+and key value.
+.P
+You specify the database with the `\*c-d\*d' option, the table
+with the `\*c-t\*d' option, and the column to be updated with the
+`\*c-c\*d' option.
+Optionally, you can specify the username and password with
+the `\*c-u\*d' and `\*c-p\*d' options (not recommended for
+security reasons, but possible nonetheless).
+The file to be used can be specified with the `\*c-f\*d' option
+or as the last argument on the line.
+For each necessary key column, you use the `\*c-k\*d' option
+followed by the column name and the value in that column for the
+row to be updated.
+The value will be converted into a string embedded in single
+quotes, with any embedded single quotes doubled up so that the
+SQL parser is happy.
+This can get complicated because the shell also uses single and
+double quotes too.
+For example, to use a key column containing the string:
+.P
+.eS
+    He said, "Don't delete me!"
+.eE
+.P
+the command line might look like:
+.P
+.eS
+updblob -d dbase -t blobs -c text_col -f new_blob_file \e
+    -k char_col="He said, \e"Don't delete me!\e""
+.eE
+.P
+The `\*c-x\*d' option prints the UPDATE statement that is executed.
+The `\*c-n\*d' option prevents the statement from being executed (it is,
+however, prepared, so that it is checked for validity).
+The `\*c-V\*d' option prints the version number of the program and exits.
+.SH "SEE ALSO"
+sqlcmd(1J)
+.SH DIAGNOSTICS
+If no rows are updated, or if more than one rows is updated, you get
+a warning printed on stderr (but the command is still successful).
+.P
+If the SQL created is not valid, then you'll see the
+SQL and ISAM error messages from the engine.
+.SH BUGS
+None known.
+.SH AUTHOR
+Jonathan Leffler
+.br
+JLSS
+.br
+21st August 1997

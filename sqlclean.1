@@ -1,0 +1,52 @@
+'\" @(#)$Id: sqlclean.1,v 1.2 1992/05/10 19:02:42 jl Exp $
+'\" @(#)Manual page: SQLCLEAN/SQLRESET -- database transfer tools
+'\" @(#)SQLCMD Version 90.02 (2016-07-28)
+.ds fC "Version: $Revision: 1.2 $ ($Date: 1992/05/10 19:02:42 $)
+.TH SQLCLEAN 1S "JLSS Informix Tools"
+.SH NAME
+sqlclean \(em remove absolute pathnames from database
+.br
+sqlreset \(em restore transaction log
+.SH SYNOPSIS
+\fBsqlclean\fP database
+.br
+\fBsqlreset\fP database [logfile]
+.SH DESCRIPTION
+\fBSqlclean\fP is used to disable the transaction log on the named database
+and to remove any absolute pathnames for tables from the \fBdirpath\fP column
+of the table \fBsystables\fP.
+This is a necessary preliminary to moving the database to a new location.
+.P
+\fBSqlreset\fP is used after the database has been moved.
+It reenables the transaction log, optionally renaming it.
+.SH DETAILS
+\fBSqlclean\fP updates the table type of the log to `l' (from `L');
+this disables it quite effectively.
+\fBSqlclean\fP updates the directory path of all the tables where the
+existing path contains a slash `/'.
+It is done in two phases; select the appropriate tables; massage the
+path names using \fBsed\fP, and then execute the updates.
+.P
+\fBSqlreset\fP changes the table type from `l' back to `L';
+if a new transaction log was specified, this name is used in place
+of the existing transaction log.
+.SH SEE ALSO
+Informix Reference Manuals and Tech Notes.
+sed(1).
+.SH BUGS
+In Informix: it is unclear what causes a table to acquire an absolute path
+rather than a relative path.
+.P
+In \fBsqlclean\fP: if the table is located in a remote directory, it is lost.
+Do not use \s-2CREATE TABLE ... IN "file"\s0.
+.P
+In \fBsqlreset\fP: nothing happens if the transaction log was not stopped by
+\fBsqlclean\fP.
+.SH VERSION
+The current version of this product is SQLCMD Version 90.02 (2016-07-28).
+.SH AUTHOR
+Jonathan Leffler
+.br
+JLSS
+.br
+22nd April 1992

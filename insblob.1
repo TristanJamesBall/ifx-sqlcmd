@@ -1,0 +1,36 @@
+.\" @(#)$Id: insblob.1,v 2004.1 2004/10/14 22:35:31 jleffler Exp $
+.\" @(#)Manual page: Application -- Part of application
+.ds fC "Version: $Revision: 2004.1 $ ($Date: 2004/10/14 22:35:31 $)
+.TH INSBLOB 1S "JLSS UNIX Tools"
+.SH NAME
+insblob \(em insert blobs from file into table
+.SH SYNOPSIS
+\fBinsblob\fP [-Vnx] -d dbase [-u username -p password] -t table -b blobcol=file [-b blobcol=file ...] -c col=val [-c col=val ...]
+.SH DESCRIPTION
+The \fIinsblob\fP program inserts a single row of data into the table
+specified by the \*c-t\*d option in the database specified by the
+\*c-d\*d option.
+Optionally, you can specify the username and password with
+the `\*c-u\*d' and `\*c-p\*d' options (not recommended for
+security reasons, but possible nonetheless).
+The blob (BYTE or TEXT) column(s) are identified by the \*c-b\*d option,
+which gives the name of the column followed by an equals sign and the
+name of a file that should be loaded into the blob.
+The regular column(s) \(em anything other than a BYTE or TEXT column
+\(em will be given the value specified by the string following the
+equals sign.
+.P
+There is no checking in the code that you specify valid table name,
+column names, etc, nor that you do not specify the same column twice
+etc; the server will do that.
+ESQL/C will report if you specify a non-existent database, or a
+non-existent or non-openable file.
+.SH FILES
+.SH "SEE ALSO"
+.SH DIAGNOSTICS
+.SH BUGS
+.SH AUTHOR
+Jonathan Leffler
+.br
+JLSS
+.br

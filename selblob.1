@@ -1,0 +1,72 @@
+.\" @(#)$Id: selblob.1,v 2004.1 2004/10/14 22:35:31 jleffler Exp $
+.\" @(#)Manual page: SELBLOB -- Blob Manipulation Example
+.ds fC "Version: $Revision: 2004.1 $ ($Date: 2004/10/14 22:35:31 $)
+\"
+.TH SELBLOB 1J "JLSS Informix Tools"
+.SH NAME
+selblob \(em select blob into file
+.SH SYNOPSIS
+\fBselblob\fP [-Vnx] -d dbase [-u username -p password] -t table -c blobcolumn \e
+.br
+	-k column=value [-k col=val ...] [-f] blobfile
+.SH DESCRIPTION
+\fBSelblob\fP selects a blob (BYTE or TEXT) column from a table into a
+specified file on disk.
+.P
+You specify the database with the `\*c-d\*d' option, the table
+with the `\*c-t\*d' option, and the column to be selected with the
+`\*c-c\*d' option.
+Optionally, you can specify the username and password with
+the `\*c-u\*d' and `\*c-p\*d' options (not recommended for
+security reasons, but possible nonetheless).
+The file to be generated can be specified with the `\*c-f\*d' option
+or as the last argument on the line.
+For each necessary key column, you use the `\*c-k\*d' option
+followed by the column name and the value in that column for the
+row to be updated.
+The value will be converted into a string embedded in single
+quotes, with any embedded single quotes doubled up so that the
+SQL parser is happy.
+This can get complicated because the shell also uses single and
+double quotes too.
+For example, to use a key column containing the string:
+.P
+.eS
+    He said, "Don't delete me!"
+.eE
+.P
+the command line might look like:
+.P
+.eS
+selblob -d dbase -t blobs -c text_col -f new_blob_file \e
+    -k char_col="He said, \e"Don't delete me!\e""
+.eE
+.P
+The `\*c-x\*d' option prints the statements that are executed.
+The `\*c-n\*d' option prevents the statement from being executed (it is,
+however, prepared, so that it is checked for validity).
+The `\*c-V\*d' option prints the version number of the program and exits.
+.SH "FUTURE DIRECTIONS"
+It would be interesting to upgrade \fBselblob\fP to use a
+command line notation such as this so that multiple blob columns in a
+single row can be selected simultaneously:
+.eS
+    selblob -d dbase -t table -k key=value -c blobcol1=file1 \
+        -c blobcol2=file2
+.eE
+.SH "SEE ALSO"
+selmultiblob(1J), updblob(1J), appblob(1J)
+.SH DIAGNOSTICS
+If no rows are selected, or if more than one row is selected, you get
+a warning printed on stderr (but the command is still successful).
+.P
+If the SQL created is not valid, then you'll see the
+SQL and ISAM error messages from the engine.
+.SH BUGS
+None known.
+.SH AUTHOR
+Jonathan Leffler
+.br
+JLSS
+.br
+8th September 2001

@@ -1,0 +1,34 @@
+@(#)$Id: esql-5.x-patch,v 1.1 2001/01/11 05:57:16 jleffler Exp $
+
+--- /usr/informix/5.08.UD1/bin/esql	Fri Jan 10 15:39:09 1997
++++ ./esql	Thu Dec 31 14:35:39 1998
+@@ -25,7 +25,7 @@
+ : '
+ INFDIR=${INFORMIXDIR=/usr/informix}
+ PREPCC=${INFDIR}/lib/esql/esqlc
+-CC="cc"
++CC=${INFORMIXC:="cc"}
+ STAT=0
+ TYPE=unix
+ A=
+@@ -100,17 +100,17 @@
+ 	    shift
+ 	    ;;
+ 	-g )
+-	    CC="cc -g"
++	    CC="${INFORMIXC} -g"
+ 	    PA="$PA $1"
+ 	    shift
+ 	    ;;
+ 	-G )
+-	    CC="cc -g"
++	    CC="${INFORMIXC} -g"
+ 	    PA="$PA $1"
+ 	    shift
+ 	    ;;
+ 	-nln )
+-	    CC="cc -g"
++	    CC="${INFORMIXC} -g"
+ 	    PA="$PA $1"
+ 	    shift
+ 	    ;;

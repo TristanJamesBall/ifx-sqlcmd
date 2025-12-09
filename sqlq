@@ -1,0 +1,24 @@
+#!/bin/ksh
+
+DBDELIM=$'\034'
+
+typeset -a out
+{
+	INFORMIXDIR=/opt/ifx.sdk.450 /opt/informix/sqlcmd/bin/sqlcmd \
+		-H \
+		-F csv \
+		-D "$DBDELIM" \
+		${DB:+ -d ${DB} } \
+	      	"$@"
+} | { 
+	pspg \
+		--ascii \
+		--csv \
+		--ni \
+		--csv-separator "$DBDELIM" \
+		--border 1 \
+		--csv-header on \
+		-s "5" 
+} | {
+	grep -Ev '^\([0-9]+ rows\)'
+}

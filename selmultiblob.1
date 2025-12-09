@@ -1,0 +1,52 @@
+.\" @(#)$Id: selmultiblob.1,v 2004.1 2004/10/14 22:35:31 jleffler Exp $
+.\" @(#)Manual page: SELMULTIBLOB -- Blob Manipulation Example
+.ds fC "Version: $Revision: 2004.1 $ ($Date: 2004/10/14 22:35:31 $)
+\"
+.TH SELMULTIBLOB 1J "JLSS Informix Tools"
+.SH NAME
+selmultiblob \(em select multiple blobs into files
+.SH SYNOPSIS
+\fBselmultiblob\fP [-Vnx] -d dbase [-u username -p password] -t table -c blobcolumn \e
+.br
+      [-w whereclause] [-D dir]
+.SH DESCRIPTION
+\fBSelmultiblob\fP selects one or more blob (BYTE or TEXT) columns from a
+table into files in the specified directory (default current directory) on
+disk.
+.P
+You specify the database with the `\*c-d\*d' option, the table with the
+`\*c-t\*d' option, and the column(s) to be selected with the `\*c-c\*d' option.
+Optionally, you can specify the username and password with
+the `\*c-u\*d' and `\*c-p\*d' options (not recommended for
+security reasons, but possible nonetheless).
+The optional WHERE clause specified with the `\*c-w\*d' option can apply any
+valid conditions to the table.
+The directory where the blob files are placed can be specified with the
+`\*c-D\*d' option but the default is the current directory.
+The directory (and any directories leading to it) will be created if necessary.
+.P
+The `\*c-x\*d' option prints the statements that are executed.
+The `\*c-n\*d' option prevents the statement from being executed (it is,
+however, prepared, so that it is checked for validity).
+The `\*c-V\*d' option prints the version number of the program and exits.
+.P
+The generated blob file names are a combination of the column name and the row number
+in the output.
+.SH "FUTURE DIRECTIONS"
+It would be interesting to upgrade \fBselmultiblob\fP to allow the blob file
+names to be specified more precisely.
+.SH "SEE ALSO"
+selblob(1J), updblob(1J), appblob(1J)
+.SH DIAGNOSTICS
+It is not an error to select no data.
+.P
+If the SQL created is not valid, then you'll see the
+SQL and ISAM error messages from the engine.
+.SH BUGS
+None known.
+.SH AUTHOR
+Jonathan Leffler
+.br
+JLSS
+.br
+30th September 2001

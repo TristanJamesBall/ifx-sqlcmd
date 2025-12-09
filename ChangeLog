@@ -1,0 +1,1169 @@
+Change Log for SQLCMD Program
+=============================
+
+@(#)$Id: ChangeLog,v 2016.1 2016/07/28 19:53:09 jleffler Exp $
+
+Version 90.02
+-------------
+2016-07-28: Version 90.02 - Uploaded to IIUG.
+2016-07-28: Generate error message instead of assertion failure if argument
+            to -D, -E, -G, -Q is (massively) too long.  Issue raised by Art
+            Kagel <art.kagel@gmail.com> on behalf of Adam Tauno Williams
+            <awilliam@whitemiceconsulting.com> with problem probably caused
+            by quote handling in myexport.sh.  The grammar files
+            (connecty.y, connect.h) already limit these in LOAD, RELOAD and
+            UNLOAD statements.
+
+Version 90.01
+-------------
+2015-11-14: Version 90.01 - Limited release.
+2015-11-14: Explicitly set IFX_DEFERRED_PREPARE=0 in environment to avoid
+            problems when it is set to 1.  SQLCMD expects PREPARE to tell
+            it what type of statement it is processing and gets upset if
+            that information is deferred.  Problem reported by Eric Byrnes
+            <eric.byrnes@bldr.com>.
+2015-11-14: Arrange to suppress #pragma GCC lines that can cause problems
+            with GCC 4.5.x and earlier.  They are primarily to reassure the
+            maintainer that the code is clean and don't really affect end
+            users (unless the default compilation options are made much
+            more stringent).  Problem reported in October by Ray Burns
+            <Ray.Burns@velocityglobal.co.nz>.
+
+Version 90.00
+-------------
+2015-11-08: Version 90.00 - Uploaded to IIUG.
+2015-07-17: Move documentation to share/man/man1 (instead of man/man1).
+2015-07-16: Add support for 'block' output format (e.g. sqlcmd -F block).
+            Closely based on a patch provided by Øyvind Gjerstad
+            <oyvind.gjerstad@postnord.com>.  Simulates DB-Access output
+            format, with each row printed with the column name on the left
+            and the value on the right.
+
+Version 89.03
+-------------
+2015-07-10: Version 89.03 - Uploaded to IIUG.
+2015-07-10: Warn when -u or -p options appear after -d on command line.
+2015-07-10: Sundry cleanup operations (posixver.h, etc).
+2015-07-10: Ensure correct handling of WHERE in connblob.ec
+
+Version 89.02
+-------------
+2014-07-27: Version 89.02.
+2014-07-27: Report when exit status from system() is non-zero, avoiding
+            compilation warning on Ubuntu 14.04.
+
+Version 89.01
+-------------
+2013-12-28: Version 89.01.
+2013-12-28: Fix selblob code (broken, unspotted, since May 2008; reported
+            by Chris Wolf <Chris.Wolf@sungardps.com>).  Rudimentary test
+            for selblob.  Option handling changes in selblob, appblob,
+            selmultiblob. Fix independent build for selmultiblob.
+
+Version 89.00
+-------------
+2013-09-08: Version 89.00 - Uploaded to IIUG.
+2013-09-08: Fix compilation warnings under stringent compilation options,
+            reported by Øyvind Gjerstad <ogj@tollpost.no>.
+2013-09-08: Fix compilation warnings from GNU Readline under very stringent
+            compilation options, introducing gnureadline.h to centralize
+            the hackery.
+
+Version 88.02
+-------------
+2012-10-28: Version 88.02 - Limited distribution.
+2012-10-28: Fix serious malformatting of characters needing escapes
+            (reported by Dirk Bornhütter <dirk@bornhuetter.de> via Art
+            Kagel).
+2012-08-14: Redo sleep command to avoid C99 interleaved declarations and
+            statements.  Reported by Art Kagel <art.kagel@gmail.com> on
+            behalf of a client using AIX 5.2.  It is not clear whether
+            configure.ac is using AC_PROG_CC_C99 correctly.
+
+Version 88.01
+-------------
+2012-08-05: Version 88.01 - Never formally released to anybody.
+2012-08-05: Add omitted keywords to keyword rule in connecty.y.
+
+Version 88.00
+-------------
+2012-07-20: Version 88.00 - Uploaded to IIUG.
+2012-07-19: Finish support for -b (DB-Access -X).  In DB-Access, SELECT
+            and OUTPUT are not affected by -X; in SQLCMD, SELECT is.
+2012-06-21: Support fractional seconds in sleep.  If the system supports
+            usleep() but not nanosleep() or clock_nanosleep(), then any
+            sleep requested that is longer than 1000 seconds is converted
+            to a plain sleep() call with no sub-second component.
+2011-11-02: Add '-b' to support DB-Access hex (-X) mode input and output,
+            as requested by Kernoal Stephens <kernoals@gmail.com>.
+2011-09-02: Build: MacOS X Lion (10.7) needs ranlib on updated libraries.
+2011-09-02: Configure for memmem() - MacOS X Lion (10.7) has it too.
+2011-05-12: Improve formatting of column names and types; responds to the
+            different format options.  Fixed widths should be the same for
+            headings, types and data (needs major data structure changes).
+
+Version 87.02
+-------------
+2010-12-18: Version 87.02 - Uploaded to IIUG.
+2010-12-18: Add support for connections establishing trusted contexts.
+
+Version 87.01
+-------------
+2010-12-06: Version 87.01 - Limited distribution.
+2010-12-06: Dusan Simic <dusan.simic@versaterm.com> reports compiling 86.00
+            and 87.00 on AIX 6.1; related to memmem() and C99; fixed.
+
+Version 87.00
+-------------
+2010-10-21: Version 87.00 - Uploaded to IIUG.
+2010-10-21: Fix bug found by Eric Haszlakiewicz <ehaszla@transunion.com> in
+            UNLOAD with delimiter, and related bugs that are now obvious.
+2010-10-13: Introduce -G eor to set EOR on command line.  Fix escaping so
+            if EOR is (say) '\f', newlines in data are not escaped.  For
+            multi-character EOR (such as CRLF), escape first character (CR)
+            but not second (LF) or subsequent (but is that correct, or
+            should all characters in EOR string be escaped?).  Also, do we
+            check for overlap of EOR with delimiter and escape?  Add
+            $DBNEWLINE as environment variable parallel to DBDELIMITER,
+            DBESCAPE, DBQUOTE.
+2010-09-25: Reinstate stderr.[ch] v8.x technology as v10.x
+2010-09-25: Patch from Øyvind Gjerstad <ogj@tollpost.no> to fix bug in
+            HTML output.
+
+Version 86.09
+-------------
+2010-09-10: Version 86.09 - Uploaded to IIUG.
+2010-09-10: People actively running into the POSIX getline() problem.
+2010-05-26: Various changes in preparation for things to come (in 87.xx).
+
+Version 86.08
+-------------
+2010-05-16: Version 86.08 - internal release only.
+2010-05-16: Rename getline() to jlss_getline() to avoid conflict with POSIX
+            2008 version of getline(), found in <stdio.h> in recent Linux.
+2010-05-16: Configure now uses ./program to test ESQL/C for dot-less PATH.
+
+Version 86.07
+-------------
+2010-04-11: Version 86.07 - internal release only.
+2010-04-11: Redo ifx_var_dealloc() fix - GCC 3.4.5 on Linux not happy.
+
+Version 86.06
+-------------
+2010-04-11: Version 86.06 - internal release only.
+2010-04-11: Fix argument handling (remove -G, -W support; do not list -n).
+2010-01-06: Richard Fahey <RFahey@west.com> reported a core dump in
+            sqlupload.  Reproduces on MacOS X - crash was in
+            ifx_var_dealloc() in describe.ec.  The problem can be seen
+            when looking at the ifx_var_flag() code, and then comparing
+            it with the ifx_var_dealloc().
+
+Version 86.05
+-------------
+2009-10-22: Version 86.05 - limited externl release.
+2009-10-22: Make C99 code work under C89 too (problems found with ancient
+            AIX C compilers (XLC v6) by Joe Plugge <JRPlugge@west.com>).
+2009-07-17: Add support for CSDK versions to 4.99 (Panther uses 4.10).
+2009-07-17: Use 'mkdir -p' to create target directories for install.
+
+Version 86.04
+-------------
+2009-07-17: Version 86.04 - limited release only.
+2009-07-17: Fix build problem on 64-bit MacOS X.
+
+Version 86.03
+-------------
+2009-06-14: Version 86.03 - limited release only.
+2009-06-14: SQLCMD: fix assertion failure on "LOAD FROM /tmp/x.2".  Report
+            by Cesar Inacio Martins <cesar_inacio_martins@yahoo.com.br>.
+
+Version 86.02
+-------------
+2009-03-29: Version 86.02 - internal release only.
+2009-03-29: SQLCMD: Add 'erase' (single letter 'd') to erase history.
+
+Version 86.01
+-------------
+2008-12-31: Version 86.01 - never formally released.
+2008-11-03: Edit sqlcmd.1 to clarify support for basic IUS types (BOOLEAN,
+            LVARCHAR, INT8, BIGINT, SERIAL8, BIGSERIAL) prompted by a question
+            from Joe R Plugge <JRPlugge@west.com>.
+2008-10-21: Fix connecty.y so it can work as a test program (again).
+2008-09-19: AutoConf 2.63 marks AC_TYPE_SIGNAL as obsolescent (can safely
+            assume RETSIGTYPE is void everywhere).  Remove use of both
+            macro and type.
+2008-08-17: SQLCMD: Detect program name better (sqlreload.64 == sqlreload).
+2008-08-15: Configure now checks that ESQL/C compiler 'works'.
+2008-08-01: Update version information - per "Software Craftsmanship" by
+            Pete McBreen.
+
+Version 86.00
+-------------
+2008-07-15: Version 86.00 - released to IIUG Software Archive.
+2008-07-15: SQLCMD: Include test suite now that it has been upgraded to be
+            manageable; run with 'make test'.  Include a SCHEDULE file from
+            1992, just for curiosity - shows what testing should be in
+            place but isn't.
+2008-07-13: SQLCMD: describe.ec v2007.1 (2007-02-10) broke loading of
+            LVARCHAR, so afflicts 81.00 onwards.  Workaround coded, but
+            long-term solution probably involves rather dramatic changes.
+2008-07-12: SQLCMD: revise code to recognize dbase@server:owner.table
+            in LOAD statements, including DELIMIDENT support.  Also minor
+            fix ups in test suite.
+
+Version 85.01
+-------------
+2008-06-11: Version 85.01 - limited release only.
+2008-06-11: Work around loc_t on AIX compilation problems.
+2008-06-09: Fix AIX 5.3 library compilation issues reported by Tom Lowrie
+            <tom.lowrie@tylertech.com>.
+2008-06-02: Rework dumpconfig.h for no config.h - surprisingly tricky.
+2008-05-25: CQ idsdb00155957 fixed in GA ESQL/C 3.50.xC1.
+2008-05-25: Add HTML output mode - generating an HTML table.
+2008-05-18: Changes towards Windows support.
+
+Version 85.00
+-------------
+2008-04-18: Version 85.00 released to IIUG Software Archive.
+2008-04-18: Fix up oddities in DB-Access mode handling.
+
+Version 84.04
+-------------
+2008-04-18: Version 84.04 - limited release only.
+2008-04-18: Add DB-Access/ISQL mode: dbaccess {dbase|-} [{script|-}] by
+            request of Tom Girsch <Tom.Girsch@hilton.com>.  (Also
+            accessible via -J option.)
+
+Version 84.03
+-------------
+2008-04-06: Version 84.03 - limited release only.
+2008-04-06: Second attempt: explicitly test for uintptr_t and PRIXPTR.
+            Previous 'solution' worked for 64-bit ESQL/C on Solaris 9, but
+            failed miserably for 32-bit.
+
+Version 84.02
+-------------
+2008-04-06: Version 84.02 - limited release only.
+2008-04-06: Solaris 9 <inttypes.h> does not define PRIXPTR (or typedef
+            uintptr_t).  Create and use dumpconfig.h - internal header for
+            dump*.ec - to work arond this.  Problem reported by Peter Pain
+            <peter.pain@dpi.nsw.gov.au>.
+
+Version 84.01
+-------------
+2008-03-09: Version 84.01 - limited release only.
+2008-03-19: Fix acinformix.m4 to detect ifx_loc_t (reported by Joe Plugge
+            <JRPlugge@west.com>), and upgrade dumpesql.h to use the revised
+            config.h.
+
+Version 84.00
+-------------
+2008-03-09: Version 84.00 released to IIUG Software Archive. 
+2008-03-09: Report SERIAL8 and BIGSERIAL values on insert when verbose.
+2008-03-09: Reduce width of INT8/SERIAL8 columns under fixed output, and
+            right justify numbers under fixed formats.
+2008-03-09: Support for BIGINT and BIGSERIAL - CSDK 3.50 & IDS 11.50.
+            CQ idsdb00155957: ifx_getbigserial() is not declared.
+2008-03-08: Library work - reinstate compilation under ESQL/C 5.20.
+
+Version 83.01
+-------------
+2008-03-01: Version 83.01 - internal release only.
+2008-03-01: Make it easy to install 32-bit and 64-bit versions in the same
+            directory.
+
+Version 83.00
+-------------
+2008-02-29: Version 83.00 released to IIUG Software Archive.
+2008-02-29: Rework FLOAT and SMALLFLOAT formats for better accuracy.
+2008-02-29: Fix 64-bit compilation warnings.  (Hack fix in upload.ec)
+
+Version 82.03
+-------------
+2008-02-11: Version 82.03 released to IIUG Software Archive.
+
+Version 82.02
+-------------
+2008-02-11: Version 82.02 on limited release.
+2008-02-11: Fix type headings to recognize LVARCHAR and BOOLEAN.
+2008-02-10: BUILD: Reestablish C++ (G++ 4.2.3) compilability.
+
+Version 82.01
+-------------
+2008-02-10: Version 82.01 on limited release.
+2008-02-10: DIST: Rename configure.in to configure.ac
+2008-02-10: DIST: Remove unnecessary autoconfiguration files from
+            distributed tar file.
+
+Version 82.00
+-------------
+2008-01-30: Version 82.00 on limited release.
+2008-01-30: Partial support for single-stepping through SQL scripts.
+            Enabled if compiled with UFLAGS=-DENABLE_SINGLE_STEP
+            on make command line (not by default).
+2008-01-28: Catch-up on library file changes, etc.
+
+Version 81.05
+-------------
+2007-12-25: Version 81.05 - internal release only.
+2007-12-24: Reworking decsci.c et al; fix decimal conversion in output.c.
+2007-09-02: Reinstate GNU General Public License version 2.
+2007-09-02: Remove build support with I4GL by omitting esql.sh.
+
+Version 81.04
+-------------
+2007-05-14: Version 81.04 released under GNU Lesser General Public License
+            version 2.1. to Jon Strabala <Jon.Strabala@QuantumSI.com> of
+            Quantum Systems Integrators
+
+Version 81.03
+-------------
+2007-05-14: Version 81.03 released to IIUG Software Archive.
+2007-05-11: BUILD: Prevent autoconf warning about datarootdir in Makefile.in
+2007-05-10: BUILD: Fix problems with GNU Make and AIX Make with no Yacc.
+            Add rule 'no-yacc' to release Makefile.in to rename files.
+2007-05-10: BUILD: Rename CONNECTY.c to connecty.c.std to avoid problems
+            on case-insensitive file systems.
+2007-05-10: BUILD: Revised release system - now have check sums.
+
+Version 81.02 - never released.
+
+Version 81.01
+-------------
+2007-04-15: Version 81.01 released to IIUG Software Archive.
+2007-04-15: UPDBLOB: Start using snprintf() instead of sprintf().
+2007-04-15: BUILD: Provide surrogate snprintf() for deficient platforms.
+2007-04-15: SQLCMD: Benchmark mode reports time in ISO 8601 notation.
+2007-04-15: SQLCMD: Remove non-operational PAM support.
+2007-03-02: SQLCMD: Unquoted non-XML format options in LOAD and UNLOAD.
+
+Version 81.00
+-------------
+2007-02-13: Version 81.00 on limited release.
+2007-02-13: Fix core dump from using jmp_buf instead of sigjmp_buf.
+2007-02-10: Use signal patch from Carsten Haese <carsten@uniqsys.com>
+2007-01-27: Use readline patch from Carsten Haese <carsten@uniqsys.com>
+2006-11-01: Fix esqltype.h for use with ESQL/C 5.x; support CSDK 3.00.
+2006-09-01: {Incomplete PAM support - not usable.  Intractable problems.}
+2006-06-30: BUILD: Fix (some) problems on Windows.  No fcntl() locking.
+2006-04-19: SQLREAD: Better detection of non-recognized commands.
+2006-04-19: SQLCMD: -G option is obsolete (recognized, but gives error).
+
+Version 80.07
+-------------
+2006-04-11: Version 80.07 on limited release.
+2006-04-10: Add SQLREAD - suggested by Art Kagel.  Undocumented.
+
+Version 80.06
+-------------
+2006-04-10: Version 80.06 on limited release.
+2006-04-10: SQLCMD: fix null pointer core dumps from unified connections.
+
+Version 80.05
+-------------
+2006-04-07: Version 80.05 on internal release only.
+2006-04-07: SQLCMD/SQLUPLOAD: unify connection mechanisms.
+2006-04-04: SQLCMD: Fix bug in connection information overwriting released
+            space.  Don't have multiple connections current any more.
+2006-04-03: BUILD: Improve 64-bit notes in INSTALL and FAQ.html; reported
+            by Doug McAllister <Doug.McAllister@fmr.com>
+
+Version 80.04
+-------------
+2006-01-06: Version 80.04 on limited release.
+2006-01-06: SQLCMD: Randy Kennedy <rkennedy@scottsdaleaz.gov> found that
+            SQLCMD mishandles date formatting when DBDATE is erroneous.
+
+Version 80.03
+-------------
+2005-12-20: Version 80.03 on limited release.
+2005-12-19: Sergios Zagotis <sergios.zagotsis@egnatiabank.gr> asked about
+            builds on Windows.  The WinNT/Makefile was 22 source files out
+            of date.  This release adds the missing files.
+
+Version 80.02
+-------------
+2005-12-19: Version 80.02 on limited release.
+2005-12-19: AUTOCONF: Bruce Simms reported a stray double quote in
+            acinformix.m4, and it took considerable prodding to regenerate
+            the error.  This is why things go on limited release.
+
+Version 80.01
+-------------
+2005-12-16: Version 80.01 on limited release.
+2005-12-15: Bruce Simms <BSimms@talx.com> reported warning in sqltoken.c
+            that is easily fixed completely portably. and removes a 4-year
+            old KLUDGE comment too.  Recognize names with embedded '$'.
+2005-12-14: AUTOCONF: Bruce Simms <BSimms@talx.com> found that the code
+            did not recognize 64-bit ESQL/C on Solaris 8.  Fix both
+            acinformix.m4 and Makefile.in so that it does.
+2005-12-12: Bruce Simms <BSimms@talx.com> reported warning in sqlstmt.ec
+            that is easily fixed completely portably.
+
+Version 80.00
+-------------
+2005-11-23: Version 80.00 released in time for Thanksgiving.
+2005-11-18: SQLCMD: Fix occasional crash in readrecord() by reworking loop.
+2005-11-18: SQLCMD: Add FIXDEL (fixed width, delimited fields).
+
+Version 79.04
+-------------
+2005-11-01: Version 79.04 released.
+2005-11-01: SQLCMD: Improve wording of E_BLOBFIXED message.
+
+Version 79.03
+-------------
+2005-10-10: Version 79.03 released.
+2005-10-10: Fix version control information in library files.
+
+Version 79.02
+-------------
+2005-09-28: Version 79.02 released internally only.
+2005-09-28: SQLCMD: Fix bug in history mechanism such that replay failed.
+            Breakage occurred in version 77.01.
+2005-09-28: Update source so RCS version information is not discarded by
+            over-zealous C optimizers.
+
+Version 79.01
+-------------
+2005-08-19: Version 79.01 on limited release.
+2005-08-19: SQLCMD: Fix mismatch in -X documentation; add FIXSEP to format
+            list.
+2005-08-19: SQLCMD: Fix file name and line number for LOAD errors.
+2005-06-27: SQLCMD: Report SQL command file name and line number in
+            error messages.
+
+Version 79.00
+-------------
+2005-06-23: Version 79.00 on limited release.
+2005-06-23: SQLCMD: Fix grammar to recognize SET PDQPRIORITY 10 (problem
+            found by Doug Conrey <doug_conrey@oci.com>).
+2005-06-21: HISTDUMP: revise history mechanism to open history files in
+            read only mode when requested, adding parameter to hist_open().
+
+Version 78.00
+-------------
+2005-05-06: Version 78.00 uploaded to IIUG.
+2005-05-06: SQLCMD: Add support for 'fixsep' format - fixed format output
+            with field separators (current field delimiter).
+2005-05-06: SQLCMD: The '@' prefix to commands is officially deprecated,
+            and support will be removed after 2006-06-30.
+2005-05-06: SQLCMD: Try to permit unquoted file names in LOAD, UNLOAD and
+            RELOAD.  It is not readily doable - this deviation from the
+            Informix tools is now formally documented.
+2005-05-03: SQLCMD: Add 'help' built-in command.  Need to sort out I18N.
+2005-04-29: SQLCMD: Add '-X record=rectag,recset=settag,header=hdrtag'
+            support, using getsubopt().  Deprecate '-G rectag' - it still
+            works but is redundant; support for it will be dropped after
+            2006-06-30.  Revise 'format xml' to accept the new notation.
+
+Version 77.08
+-------------
+2005-04-22: Version 77.08 uploaded to IIUG.
+2005-04-22: SQLCMD: Fix XML output heading - bug reported by Roy Mercer
+            <roy.mercer@gmail.com>.  Output now accepted by Firefox 1.0.3
+            as XML, albeit without any style information.  Remove the
+            dubious encoding information.  Convert the heading XML tags to
+            lower case.
+
+Version 77.07
+-------------
+2005-04-01: Version 77.07 uploaded to IIUG.
+2005-04-01: LIBRARY: make sure tokencmp.h has size_t so it compiles on
+            HP-UX; found by Randy Kennedy <rkennedy@scottsdaleaz.gov>.
+2005-04-01: SQLCMD: Change of mind; -N 0 will not be supported.  Use a
+            number bigger than the number of rows in your data file.  Do
+            not try to load more than 2 billion rows in a single TX.
+
+Version 77.06
+-------------
+2005-03-31: Version 77.06 on limited release.
+2005-03-31: SQLCMD: CSV output follows Excel and uses doubled up quotes
+            rather than backslash quote.  Document -G in extended help.
+            Fix the counting during RELOAD.
+2005-03-30: SQLCMD: Support SKIP n in LOAD and RELOAD (-S n on command
+            line).  Permit -N 0 to suppress sub-transactions in RELOAD.
+
+Version 77.05
+-------------
+2005-03-25: Version 77.05 released to IIUG.
+2005-03-25: SQLCMD: Fix loading problems with CSV data containing commas
+            or quotes in strings, after a question raised by
+            <try_and_err@web.de> in comp.databases.informix on
+            2005-03-17.  Rework the internals of readload.c with
+            separate CSV field scanning logic - based on the code from
+            Kernighan & Pike 'The Practice of Programming' (see
+            http://tpop.awl.com/).
+
+Version 77.04
+-------------
+2005-03-18: Version 77.04 released.
+2005-03-18: SQLCMD: Fix problems reading commands with backslashes in
+            strings.  Fix problems reading load files where the last
+            character of the last field is a backslash.
+
+Version 77.03
+-------------
+2005-03-01: Version 77.03 released to IIUG.
+2005-02-28: SQLCMD: Add format option to LOAD and RELOAD, and add format
+            and recordtag options to UNLOAD.  Fix misalignment of array
+            in context.c with enum in context.h (core dump).
+2005-02-25: SQLCMD: Add '-Y' option for no history in interactive mode.
+2005-02-25: Revise code in sqlconn.ec to avoid static buffer.
+
+Version 77.02
+-------------
+2005-02-24: Version 77.02 released.
+2005-02-23: BLOB TOOLS: Upgraded to use SQLCMDPASSWORDS too.
+
+Version 77.01
+-------------
+2005-01-12: Version 77.01 released.
+2005-01-12: BUILD: upgrade to work using C++ compiler.
+2005-01-12: SQLCMD: remove dependence on mktemp() in internal.c
+2005-01-11: SQLCMD: Do not report long tokens as a problem in general.
+
+Version 77.00
+-------------
+2005-01-04: Version 77.00 released.
+2005-01-03: SQLCMD: Support SQLCMDPASSWORDS environment variable,
+            analogous to INFOTPASS in infotables program, which is
+            available at the IIUG and was written by Ravikrishna
+            (rkusenet@sympatico.ca), after prodding.  The semantics are
+            slightly different - if you specify "sqlcmd -u me -d mine",
+            SQLCMD will ignore the entry 'mine|you|yours' because it is
+            for the wrong user (but AFAICT infotables would use that
+            entry, connecting as 'you').
+2004-12-25: Various refactorizations of headers to permit development of
+            'adhoc' on machines without CSDK.
+2004-12-08: SQLUNLOAD: Add -O orderby option.
+2004-12-03: Revise FAQ.html to discuss 64-bit builds on Solaris, and
+            indirectly on other non-natively 64-bit platforms.  Issue
+            raised by Jinming Xiao <jxiao@us.ibm.com> on attempting to
+            compile SQLCMD with a 64-bit platform.
+
+Version 76.00
+-------------
+2004-10-15: Version 76.00 released.
+2004-10-14: Pablo León <pablo.leon@horus.es> added '-u username -p
+            password' support to the *blob programs -- thanks, Pablo.
+
+Version 75.00
+-------------
+2004-08-25: Version 75.00 released.
+2004-08-24: CONFIGURE: Accommodate CSDK 2.90 which contains ESQL/C 2.90,
+            not 9.54 as you would expect.  Most source code should not test
+            ESQLC_VERSION; only headers such as esqlc.h may use it.
+2004-08-17: SQLCMD: LOAD handles DB-Access style backslash-space data for
+            empty, non-null VARCHAR, NVARCHAR, LVARCHAR fields.  Found bug
+            B169213 (ifx_var_setdata() does not permit zero-length values);
+            workaround in place.  Also found B169309 (insert cursors do not
+            handle zero-length non-null VARCHAR<->NVARCHAR conversions
+            properly); no workaround devised yet (known BUG in SQLCMD).
+2004-08-04: SQLCMD: UNLOAD generates DB-Access style backslash-space output
+            for empty, non-null VARCHAR, NVARCHAR and LVARCHAR values.
+            (Requested by Ravi <rkusenet@sympatico.ca>; previously known
+            defect - for compatibility with DB-Access.)
+2004-06-29: SQLCMD: Do not silently ignore history commands when history
+            turned off.
+
+Version 74.03
+-------------
+2004-06-07: Version 74.03 released.
+2004-06-07: ADMIN: Correct attribution in v74.02.
+
+Version 74.02
+-------------
+2004-06-04: Version 74.02 released.
+2004-06-04: SQLCMD: Fix VARCHAR handling w/o rebreaking TEXT blobs.
+            Problem reported by Ravi Krishna (rkrishna@farelogix.com).
+
+Version 74.01
+-------------
+2004-06-02: Version 74.01 released.
+2004-06-02: SQLCMD: Fix history mode initialization for '-y' option.
+2004-06-01: BUILD: Support ESQL/C 5.20 again (and indirectly 9.16).
+
+Version 74.00
+-------------
+2004-06-01: Version 74.00 released.
+2004-06-01: SQLCMD: Refix RELOAD and LOAD statement handling.
+2004-05-28: SQLCMD: Do not append ASCII NUL '\0' to TEXT blobs on LOAD.
+2004-05-28: Library: Recognize SET/*x*/{ as IUS token.
+2004-04-23: SQLCMD: Recognize CREATE FUNCTION or PROCEDURE with EXTERNAL
+            NAME (END FUNCTION or PROCEDURE is optional).
+
+Version 73.00
+-------------
+2004-01-15: Version 73.00 released.
+2004-01-14: SQLCMD: Finish work on verbose mode (pro tem) and report
+            B165572 against sqlstype.h.
+
+Version 72.08
+-------------
+2004-01-13: Version 72.08 released with minimal circulation.
+2004-01-13: SQLCMD: Fix code to detect use of readline library in sqlver.c.
+2004-01-13: SQLCMD: Support /* C style comments */ in SQL since IDS 7.31,
+            9.30, 9.40 all do so (and have done since 1997).
+
+Version 72.07
+-------------
+2003-12-18: Version 72.07 released.
+2003-12-18: SQLCMD: Fix incorrect order of code and declarations for C89;
+            reported by Mark Esser <esserm@us.ibm.com>.
+
+Version 72.06
+-------------
+2003-12-01: Version 72.06 released.
+2003-12-01: SQLCMD: Under -H or -T options, XML output now includes a
+            heading section which describes each column.  Requested by Paul
+            Falbe <falbe@cassens.com>.  EOR used consistently to end
+            records in XML format too.
+2003-12-01: SQLCMD: Finish removing err_error[12] and err_remark[12] calls,
+            and related cleanup work (most work done prior to today).
+2003-11-18: SQLCMD: Remove reference to l_sysid in filelock.c (only found
+            on Solaris?).  Problem found by Paul Falbe <falbe@cassens.com>
+            on HP-UX 11.
+
+Version 72.05
+-------------
+2003-09-05: Version 72.05 released.
+2003-09-05: SQLCMD: Add -G xmltag command line option.  Remove petty
+            restrictions on -T, -H, -N and -F options.
+
+Version 72.04
+-------------
+2003-06-25: Version 72.04 released.
+2003-06-25: AUTOCONF: handle case where esql compiler not on PATH.
+2003-06-23: Minor reformatting of many files; update dependencies.
+2003-06-23: SQLCMD: fix complaint about invalid opening quote for CSV
+            output "-F csv"; reported by Art Kagel <kagel@bloomberg.net>.
+2003-06-03: SQLCMD: increase size of command buffer in internal.c.  Fix
+            buffer overwrite bug and improper detection of EOF when END
+            PROCEDURE does not appear before command buffer overflows.
+
+Version 72.03
+-------------
+2003-04-22: Version 72.03 released - given limited circulation.
+2003-04-22: SQLCMD: add history locking etc to deal with concurrent use.
+2003-04-16: AUTOCONF: Add large file support (AC_SYS_LARGEFILE).
+2003-04-15: SQLCMD: allow blanks in quoted file names.
+2003-04-15: SQLCMD: revise code to create CONNECT (or DATABASE) statement
+            from command line options and then execute using do_command()
+            for timing etc.
+2003-04-09: Updated manual page to mention EOR command and fix up
+            documentation of output command (thanks to Ron MacNeil
+            <RMacNeil@cumpugen.com> for highlighting the problem).
+
+Version 72.02
+-------------
+2003-04-08: Version 72.02 released - given limited circulation.
+2003-04-08: Fix botched version control on 72.01 (no update of NMD).
+
+Version 72.01
+-------------
+2003-04-07: Version 72.01 released - given limited circulation.
+2003-04-07: Add semi-tested support for BOOLEAN and LVARCHAR data types,
+            at instigation of Ravi Krishna <rkrishna@farelogix.com>.
+2003-04-07: Add semi-tested support for INT8 and SERIAL8 following
+            suggestion from Zoran Naskov <maskovz@yahoo.com>.
+
+Version 72.00
+-------------
+2003-04-02: Version 72.00 released to IIUG.
+2003-04-02: Formally state in README file etc that software is released
+            under GNU General Public Licence version 2, but people can
+            contact the author for alternatives if those conditions are too
+            onerous.  Include GPL in distribution as LICENCE file.
+2003-03-31: MKPROC: fix error handling to ignore SQLNOTFOUND, per dicussion
+            on c.d.i with subject "Batch updates with ESQL" started by
+            Roger Aunebakk <aunebakk@hotmail.com> on 2003-03-26.  Note that
+            bug B162088 was also entered into PTS as a result of this.
+
+Version 71.04
+-------------
+2003-03-12: Version 71.04 limited release.
+2003-03-12: Fix problem with using int2 in insblob.ec after bug report from
+            Art Kagel <kagel@bloomberg.net>.
+2003-03-12: Fix bugs in new history mechanism, and improve error reporting.
+
+Version 71.03
+-------------
+2003-03-07: Version 71.03 release planned but not executed.
+2003-03-06: Upgrade history mechanism to use architecture-neutral file
+            format (partly suggestion by Art Kagel <kagel@bloomberg.net>).
+            Changes magic number.  History files should be interchangeable
+            between 32-bit and 64-bit versions.
+2003-03-04: Remove #define _XOPEN_SOURCE from upload.ec because it caused
+            problems on Solaris 7 for Intel and was only added to get hold
+            of strdup(), which is not used any more anyway (reported by Tom
+            Smith <Tom_Smith@ao.uscourts.gov>).
+2002-11-05: Overwrite password information on 'command line'.  Does nothing
+            useful on Solaris 7, but might reduce the chance of a user
+            snooping a password via the 'ps' command on some systems (or,
+            there again, it might not).
+
+Version 71.02
+-------------
+2002-10-11: Version 71.02 released (sent to WAIUG and IIUG).
+2002-10-11: ADMIN: renamed README as INSTALL and created new README after
+            tip from Walt Hultgren <walt@iiug.org>.  Minor updates to
+            FAQ.html, etc.
+
+Version 71.01
+-------------
+2002-10-10: Version 71.01 released (sent to WAIUG and IIUG).
+2002-10-10: CONFIGURE: Some issues found on Solaris with configure script
+            generated by autoconf 2.53 on MacOS X.  Upgraded configure.in
+            to try and accommodate both, but regenerated configure on
+            Solaris with autoconf 2.13.
+
+Version 71
+----------
+2002-10-10: Version 71 released.
+2002-10-09: ClientSDK 2.80 produces a very different version string for
+            'esql -V' which needs different code in acinformix.m4 to detect
+            both old and new with a single regular expression.
+
+Version 70
+----------
+2002-08-15: Version 70 released.
+2002-07-15: Minor disaster - hard disk crash on master source machine
+            shortly after moving house.  Most changes recovered, including
+            non-committed ones.  All releases will now have both MSD and
+            NMD variants archived and dispatched to multiple machines.
+
+Version 69.02
+-------------
+2002-05-30: Version 69.02 created.
+2002-05-30: SQLCMD: Handle maximum length delimited identifiers.
+
+Version 69.01
+-------------
+2002-02-08: Version 69.01 created.
+2002-02-08: SQLCMD: Fix bug mishandling y-umlaut (0xFF) in data file.
+2002-02-08: SQLCMD: Fix bug handling delimiter string in load/unload.
+2002-01-11: SQLCMD: Re-revert to do_command() - probably a debugging change
+            that was not reversed when debugging complete.  Should probably
+            provide a programmatic mechanism to switch between two modes.
+
+Version 69
+----------
+2002-01-02: Version 69 released.
+2002-01-01: SQLCMD: Add basic support for UNLOAD TO [FILE|PIPE] and LOAD
+            FROM [FILE|PIPE].  Note that if SIGPIPE is received, SQLCMD
+            terminates, which is not acceptable in the medium term.
+
+Version 68
+----------
+2001-11-19: Version 68 released.
+2001-11-16: SQLCMD: Fix handling of SET CONSTRAINTS ALL DEFERRED (missing
+            two symbols from definition of keyword in grammar).
+
+Version 67
+----------
+2001-11-01: Version 67 released.
+2001-10-19: SQLCMD: Fix grammar so SET DEBUG FILE TO "/tmp/dbg.out"; works.
+2001-10-11: SQLCMD: Remove the old '*not yet*' comments from INFO HELP.
+2001-10-11: SQLCMD: Add ERRMSG command like ECHO but writes to error file.
+2001-10-11: SQLCMD: Revert to using sql_command() to executing INFO
+            commands, but parameterize this by using a pointer to function
+            rather than either sql_command() or do_command() directly.
+            Implication: do_command() provides benchmark, trace and history
+            services; sql_command() does not.
+2001-10-10: SQLCMD: Include the table number and the number of rows in the
+            table in INFO STATUS output.
+2001-10-10: SQLCMD: Update output.c to use new dec_sci(), dec_fix() code.
+2001-10-10: SQLCMD: SQLSTATE was not available in 5.x ESQL/C.  Test using
+            ESQLC_VERSION number rather than an ESQL/C feature test.
+
+Version 66
+----------
+2001-10-01: Version 66 released.
+2001-10-01: SQLCMD: Fix core dump and other context problems handling XML
+            record tag.  Fix uninitialized benchmark status stack.  Make
+            use of STRDUP macro consistent - return value is not checked.
+2001-09-30: Add SELMULTIBLOB example blob manipulation program.
+2001-09-30: SQLCMD: Add new grammar.h, grammar.y to distribution, even
+            though they are currently unused.  They provide an indication
+            of what will happen to LOAD, UNLOAD, RELOAD and UPLOAD, but
+            nothing is carved in stone as yet.  Note that one probable
+            option is to add the SQLCMD built-in commands to the grammar
+            too -- providing a level of checking (and options) that are not
+            currently available.  For example: "output to /tmp/x3" writes
+            to a file called "to", rather than generating an error.
+2001-09-29: SQLCMD: Use new library functions to convert C character/string
+            literals to corresponding characters - for EOR, Quote, Escape,
+            Delimiter.  Use quotify() in sqlcmd.c to allow sloppy command
+            line arguments.
+2001-09-09: SQLCMD: Add code to handle EOR delimiters.  Fix bug such that
+            "delim;" did not print delimiter and did set delimiter to
+            semi-colon.  Broken backwards compatibility: character for
+            quote, escape, delim commands must be in quotes.
+2001-09-09: Add SELBLOB and APPBLOB example blob manipulation programs.
+2001-09-04: SQLCMD: Separate structure for CONNECT from INFO from LOAD.
+2001-09-03: SQLCMD: *INTERFACE CHANGE* Rename -h (history) option to -y.
+            The new -h option is for help, and shows the program version
+            information, the summary usage, and a succinct description of
+            each option.  Reserve option flags for integrating SQLUPLOAD
+            into SQLCMD; there will be changes compared with SQLUPLOAD as
+            a free-standing program.
+2001-09-02: SQLCMD: Add INFO CHECK CONSTRAINTS.
+2001-09-01: SQLCMD: Upgrade INFO TABLES, INFO SYSTABLES and INFO SYNONYMS
+            to include table type information.
+2001-08-30: SQLCMD: Implement INFO STATUS and INFO FRAGMENTS.
+2001-08-30: SQLCMD: Reject handling XML input for LOAD as too difficult to
+            handle sensibly.  Generally, programs should be strict in what
+            they generate as output and relaxed in what they accept as
+            input.  However, amongst other things, handling XML input means
+            that the code must accept <R><D1>v1a</D1><D2>v2a</D2></R> in
+            one record and <R><D2>v2b</D2><D1>v1b</D1></R> in the next; the
+            field names have to be accepted in any order (especially since
+            they are unambiguously tagged).  The code should generate NULLs
+            for any missing tags.  It must generate errors on unexpected
+            tags.  The LOAD code is set up to scan rigidly formatted data.
+            The new code for reading XML would need to skip attributes on
+            tags, ignore embedded white space (including newlines) between
+            tags, handle stuff not enclosed in the record tag, handle
+            missing record tags, handle duplicate field tags, decode HTML
+            escapes, and so on.  Therefore, the pseudo-XML generated by
+            SQLCMD is an output-only option.  Someone can write some input
+            transforming program to deal with converting from XML data to
+            Informix LOAD format, possibly in Perl.  And the LOAD commands
+            in SQLCMD will reject the request if the format is XML.
+2001-08-29: SQLCMD: Allow for comments before built-in commands.  Also
+            recognize #! as a comment so '#!/usr/bin/sqlcmd -xddbname' on
+            the first line of a script works.  The (Linux 2.2.x) kernel
+            executes sqlcmd with the argument -xddbname (enabling trace and
+            selecting the database called dbname), followed by the script
+            file name (prefixed with path), followed by any command line
+            arguments.  DB-Access cannot do this because neither it nor the
+            database server recognizes the #! line as a comment.
+2001-08-26: SQLCMD: Remove sqlcfg.h (replaced by estrdup.c and emalloc.h).
+2001-08-25: UNLOAD FORMAT: revise document to account for DB-Access -X
+            option and empty, non-null VARCHAR values.
+2001-08-25: SQLCMD: Remove support for blobinfile command and -b option
+            prior to introducing extended versions of the LOAD, RELOAD,
+            UNLOAD (and UPLOAD) statements to SQLCMD.
+2001-08-24: SQLCMD: Upgrade INFO to allow WHERE clauses on general queries
+            (rather than table-specific queries): INFO TABLES, SYNONYMS,
+            ROLES, USERS, PROCEDURES, VIEWS, BASETABLES, SYSTABLES.  Report
+            on SQL executed for INFO statements when tracing is on.
+2001-08-23: SQLCMD: Do not log history to readline history until command
+            expansion complete.  Support PASSWORD as equivalent of USING in
+            CONNECT.  Allow EXECUTE FUNCTION as well as EXECUTE PROCEDURE
+            in UNLOAD.
+
+Version 65
+----------
+2001-07-13: Version 65 given limited release.
+2001-07-13: SQLCMD: Attempt to fix problems with 64-bit integers, reported
+            by Paul Falbe <paul@cassens.com>.  Solution requires ESQL/C
+            analogues of PRId_int etc found in C99 header <inttypes.h>, not
+            provided by Informix.  Have not addressed warnings or build
+            issues requiring extra options on HP-UX 11.00.
+2001-07-12: SQLCMD: Recognize end of procedure when procedure contains
+            BEGIN <block> END END PROCEDURE; problem found by Mahesh
+            Chandrasekhar <Mahesh.Chandrasekhar@sciatl.com>
+2001-04-06: BUILD: Clean up stray generated files.
+2001-04-05: SQLCMD: Add verbose command (option -v) to print information
+            from sqlca record when appropriate.
+
+Version 64
+----------
+2001-04-04: Version 64 released (sent to IIUG web site).
+2001-04-03: SQLCMD: Add ibase (option -a) to specify input base, so you can
+            load integer data with leading zeroes.  Problem first spotted
+            in 1993 (noted when digging through ancient notebook), but also
+            independently noted in 2001.
+
+Version 63
+----------
+2001-03-30: Version 63 released.
+2001-03-29: SQLCMD: Use _XOPEN_SOURCE 500 to declare strdup() in context.c.
+            Reorder headers in sqlver.c and readcmd.c to avoid conflicts
+            between ESQL/C 9.16 headers and stderr.h (error and version).
+
+Version 62
+----------
+2001-03-05: Version 62 released (sent to IIUG web site).
+2001-03-02: SQLCMD: record comments correctly.  NB: # is no longer treated as a
+            comment introducer because IUS provides statement local variables
+            (SLVs or OUT parameters), and these use the # symbol to separate
+            the argument name and the type.
+2001-01-28: SQLCMD: use fixed ESQL/C headers for 7.2x.
+
+Version 61
+----------
+2001-01-19: Version 61 released (sent to IIUG web site).
+2001-01-18: BUILD: Known not to build with Bison 1.14; should be OK with 1.16.
+
+Version 60
+----------
+2001-01-15: Version 60 (experimental) released.
+2001-01-15: SQLCMD: attempt to fix yydebug support for plain yacc.
+2001-01-15: BUILD: use -lcurses or -lncurses (but not without -lreadline).
+
+Version 59
+----------
+2001-01-11: Version 59 released (sent to IIUG web site).
+2001-01-10: BUILD: patch ESQL/C 5.x scripts to recognize $INFORMIXC.
+2001-01-10: SQLCMD: initialize XML handling correctly.
+2001-01-09: SQLCMD: handle IIF.2000 SET{...} notation, but not as a
+            comment.  Record comments in history as well as SQL.
+
+Version 58
+----------
+2001-01-08: Version 58 released.
+2001-01-07: BUILD: retain CFLAGS, CPPFLAGS, LDFLAGS set during configure.
+2000-09-07: SQLCMD: preserve trailing blanks on VARCHAR data.
+2000-08-01: TEST: skeleton test suite in place; many tests needed.
+2000-07-14: SQLCMD: create FAQ.html file.
+2000-07-14: SQLCMD: report GNU Readline version when appropriate.
+2000-07-12: SQLCMD: remove DORMANT connection support.
+2000-07-12: SQLCMD: upgrade INFO CONNECTIONS to indicate OnLine vs SE.
+
+Version 57
+----------
+2000-07-11: Version 57 released (sent to IIUG web site).
+2000-07-11: SQLCMD: unfreeze the version number.
+2000-07-10: SQLCMD: make it compile under G++.
+2000-07-09: SQLCMD: readline code does not handle everything that it
+            should.  It echoes prompts when reading from file; it echoes
+            what it reads from the file.  It doesn't like blank lines.  It
+            records empty lines in history.  It isn't happy if you try to
+            go backwards in history before the first command entered.  In
+            short, it is a minor disaster.  It also re-emphasizes the need
+            for a sound test suite, which is sadly lacking.
+
+Version 56
+----------
+2000-06-16: Version 56 released (sent to IIUG web site).
+2000-06-16: SQLCMD: Add INFO ACCESS.
+2000-06-15: LIBRARY: Replace sqltabid.ec, sqlprocid.ec, sqltrigid.ec by
+            sqlownobj.ec.  Fix latest version of describe.ec to match
+            version 2.1.
+
+Version 55
+----------
+2000-06-14: Version 55 released (sent to IIUG web site).
+2000-06-13: SQLCMD: Handle CREATE FUNCTION too.
+2000-06-13: BUILD: Fix NT problems.
+2000-06-12: BUILD: Preliminary build for NT testing.
+2000-06-11: SQLCMD: Add more INFO options: USERS, ROLES, CONNECTIONS,
+            TRIGGERS and TRIGBODY.  Use upgraded library to handle
+            delimited identifiers (requires connection logging, but this
+            code is incomplete for DATABASE statements and '-d' option).
+2000-06-11: SQLCMD: use GNU readline when available.  Work largely done by
+            Benjamin Kahn <xkahn@cybersites.com>  -- Thank You!
+2000-05-25: SQLCMD: Add INFO VIEWBODY.
+2000-05-24: SQLCMD: XML output seems to be OK.
+2000-05-19: LIBRARY: handle delimited identifiers in INFO statements.
+
+Version 54
+----------
+2000-05-01: Version 54 fossilized.
+2000-03-25: BUILD: more work towards NT builds.
+2000-03-16: BUILD: various changes to help with build on NT.
+2000-03-15: SQLCMD: improved output towards handling embedded NUL.
+1999-12-29: SQLCMD: refactor connection management code.  Add -u username
+            and -p password options (also for sqlreload and sqlunload).
+1999-12-07: SQLCMD: change readrecord() to use getline() so that ASCII NUL
+            can be loaded if really wanted.  Retrieving ASCII NUL is much
+            harder and not yet implemented.
+
+Version 53
+----------
+1999-12-07: Version 53 released.
+1999-12-06: SQLCMD: fix porting problems on AIX 4.2.3 with ESQL/C 7.23,
+            reported by Benjamin Carlos (inf999@cap-az.com).  All changes
+            made in library code.
+
+Version 52
+----------
+1999-11-23: Version 52 released (sent to IIUG web site).
+1999-11-22: SQLCMD: improve line number reporting on load errors.
+1999-11-19: SQLCMD: use unsigned char (Uchar) throughout memory.c, after
+            bug report and fix by Roderick Schertler <roderick@argon.org>.
+
+Version 51
+----------
+1999-11-16: Version 51 released (sent to IIUG web site).
+1999-11-16: SQLCMD: fix bug in memory.c (found and fixed by Roderick
+            Schertler <roderick@argon.org> again; thanks!).  Add assertion
+            checking, etc.
+1999-11-16: BUILD: add changes to support c4gl compilation better
+            (suggestions by Roderick Schertler <roderick@argon.org>)
+
+Version 50
+----------
+1999-10-06: Version 50 released (sent to IIUG web site).
+1999-10-06: SQLCMD: allow 'format CSV'; quote dates and times.
+1999-10-06: SQLCMD: print unique column names instead of '(expression)'.
+1999-10-05: BUILD: Include config.h in esqlc.h to fix const on AIX 4.2.
+
+Version 49
+----------
+1999-10-04: Version 49 released.
+1999-10-04: BUILD: Add support for 'make install' and 'configure --prefix'.
+1999-10-04: BUILD: Incorporate changes from AIX 4.2 port.
+
+Version 48
+----------
+1999-09-13: Version 48 released (sent to IIUG web site).
+1999-09-12: BUILD: improved autoconfiguration with some caching.
+1999-09-12: SQLCMD: document INFO DATABASES and INFO CONNECTIONS.
+1999-09-12: LIBRARY: clean up debug.c to avoid getsubopt() problems.
+1999-09-10: SQLCMD: Handle SET ISOLATION etc correctly.
+
+Version 47
+----------
+1999-09-09: Version 47 released (sent to IIUG web site).
+1999-09-09: SQLCMD: Add support for UNLOAD TO "file" EXECUTE PROCEDURE.
+
+Version 46
+----------
+1999-08-15: Version 46 released.
+1999-08-14: BUILD: Recognize no DORMANT connections in 6.0x ESQL/C.
+1999-08-14: SQLCMD: Add INFO DATABASES and INFO CONNECTIONS.
+
+Version 45
+----------
+1999-06-12: Version 45 released.
+1999-06-12: LIBRARY: Fixes to work under GLIBC 2.1.x on Linux.
+
+
+Version 44
+----------
+1999-04-17: Version 44 released.
+1999-04-16: Fix error reporting in sqlprint.c (include test).
+
+Version 43
+----------
+1999-04-14: Version 43 released.
+1999-04-13: Fix upload.ec and sqlprint.c to handle ESQL/C 5.x.
+
+Version 42
+----------
+1999-04-13: Version 42 released.
+1999-04-13: Add INFO INDEXES to INFO HELP.
+1999-04-13: SQLCMD: Revise connecty.y so it compiles with bison.
+
+Version 41
+----------
+1999-04-12: Version 41 released.
+1999-04-12: BUILD: Semi-automatically sort out dependencies.
+1999-03-15: BUILD: AutoConfiscation in progress.
+1999-03-14: BUILD: AutoConfiscation in progress.
+1999-03-09: BUILD: AutoConfiscation in progress.
+1999-01-09: SQLCMD: Add options -C (sqlcmd), -P (sqlupload), -R (sqlreload)
+            and -U (sqlunload) to override command name.
+1999-01-04: BUILD: Use esqlinfo.h to control whether to use CONNECT
+            statements.
+
+Version 40
+----------
+1998-12-14: Version 40 released (to IIUG, but provisional).
+1998-12-14: SQLUPLOAD: Much work done towards -S option.
+1998-12-14: SQLCMD: Rename sqlcmd.ec to sqlstmt.ec.
+1998-12-14: SQLCMD: Rename main.c to sqlcmd.c.
+
+
+Version 39
+----------
+1998-12-11: Version 39 released.
+1998-12-11: SQLCMD: Add support for benchmark mode via built-in command.
+1998-12-11: SQLCMD: Only set output format to UNLOAD during UNLOAD if
+            current format is SELECT.  See also the unload.format file for
+            more information.
+1998-12-06: SQLUPLOAD: many major changes and cleanups.
+1998-12-05: SQLUPLOAD: Deal with MODE ANSI databases and nothing to do.
+1998-12-03: SQLUPLOAD: misc minor cleanups.
+1998-11-27: SQLUPLOAD: major cleanups to facilitate eventual integration
+            into SQLCMD.  Add some -S support.
+1998-11-18: SQLUPLOAD: more major cleanup and separation work.
+1998-11-18: SQLCMD: revise load record reading for joint use by SQLCMD and
+            SQLUPLOAD: Split reload.ec into readload.ec.
+1998-11-08: SQLUPLOAD: Add log file format info.  Remove unload format.
+1998-11-07: SQLCMD: Revise scanrecord().
+1998-11-05: SQLCMD: Add basic support for IDS/UDO in INFO column type data.
+
+Version 38
+----------
+1998-10-29: Version 38 released.
+1998-10-20: SQLSERVER: Implement and document correctly for SQLCMD.
+1998-10-20: SQLCLIENT: Implement correctly for SQLCMD.
+1998-10-20: SQLCMD: Add option -M fifo to OPTLIST.
+
+Version 37
+----------
+1998-10-17: Version 37 released.
+1998-10-17: SQLCMD: Add INFO_PROCEDURES and INFO_PROCBODY.
+1998-10-02: SQLUPLOAD: Major revisions, imposing more structure.
+1998-10-02: SQLCMD: Fix INFO TABLES in MODE ANSI database under SE.
+1998-09-30: SQLCMD: ctxt_endcontext() closes file.
+1998-09-29: SQLCMD: Radically simplify cols_in_table(), and make LOAD
+            handle temp tables.
+1998-09-29: SQLCMD: Annotate that LOAD does not work for temp tables!
+
+
+Version 36
+----------
+1998-09-25: Version 36 released.
+1998-09-25: SQLCMD: Fix SE version of INFO INDEXES.
+1998-09-25: HISTDUMP: Add -s option to report on log file range.
+1998-09-25: HISTDUMP: Add -l lower and -u upper options to limit reported data.
+1998-09-24: SQLCMD: Fix weird tabbing pattern in indexes queries.
+1998-09-11: ChangeLog created.
+
+---------------------------------------------------------------------------
+
+Previous versions and release dates, extracted from change log for the
+mkversion shell script.
+
+Version 35 (1998-07-30)
+Version 34 (1998-07-09)
+Version 33 (1998-06-17)
+    Add SQLUPLOAD
+Version 32 (1998-05-07)
+    Add support for INFO
+Version 31 (1998-04-07)
+    Add support for CONNECT, DISCONNECT, SET CONNECTION
+Version 30 (1998-04-02)
+Version 29 (1998-03-25)
+Version 28 (1998-03-24)
+Version 27 (1997-10-30)
+Version 26 (1997-06-05)
+Version 25 (1997-05-05)
+Version 24 (1997-04-30)
+Version 23 (1997-04-17)
+    Version 23 was released to the IIUG web site.
+Version 22 (1997-03-17)
+Version 21 (1997-01-27)
+Version 20 (1996-06-12)
+Version 19 (1996-04-05)
+Version 18 (1995-02-21)
+Version 17 (1994-08-04)
+Version 16 (1994-07-31)
+Version 15 (1994-07-24)
+Version 14 (1993-06-12)
+    Add support for CREATE PROCEDURE
+Version 13 (1993-05-17)
+Version 12 (1993-05-16)
+Version 11 (1993-03-24)
+Version 10 (1993-03-05)
+Version 9 (1992-12-20)
+    Fix LOAD/UNLOAD format
+Version 8 (1992-09-16)
+    Version 8 was released to the IIUG web site.
+Version 7 (1992-08-23)
+Version 6 (1992-05-28)
+Version 5 (1992-05-27)
+Version 4 (1992-05-17)
+Version 3 (1992-05-10)
+Version 2 (1992-05-10)
+Version 1 (1992-04-27)
+    Prior versions of the program were called 'rdsql'.
+    The code for that program dates back as far as 1987.
+
+# Format with: fill -xHe4 -l75

@@ -1,0 +1,83 @@
+Outline of tests required for SQLCMD
+====================================
+
+@(#)$Id: README,v 1.2 2003/04/07 22:47:05 jleffler Exp $
+
+1. Basic SQL (non-cursory statements)
+2. Basic SQL (cursory statements)
+	-- select format
+	-- unload format
+	-- fixed format
+	-- quote format (CSV)
+	-- headings on
+	-- types on
+	-- data types
+3. LOAD and UNLOAD commands
+	-- all formats
+	-- different TX sizes
+	-- load errors
+4. Context commands
+5. History commands
+6. Benchmark mode
+7. Command line processing
+
+Testing Command Reading:
+
+1.	JL 2000-07-09: When reading from keyboard.
+2.	JL 2000-07-09: When reading from file.
+3.	JL 2000-07-09: When reading from /dev/tty input within a file.
+
+4.	JL 2000-07-09: Test for initial comments.
+5.	JL 2000-07-09: Test for blank lines in between commands.
+6.	JL 2000-07-09: Test for blank lines within commands.
+7.	JL 2000-07-09: Test for empty files, and files with no useful content.
+8.	JL 2000-07-09: Test for no prompt during file input.
+9.	JL 2000-07-09: Test for prompts during keyboard input.
+
+10.	JL 2000-07-09: Use echo for much of the testing.
+11.	JL 2000-07-09: Test for quote matching.
+12.	JL 2000-07-09: Test for semicolons in comments and strings.
+13.	JL 2000-07-09: Test for quotes in comments.
+14.	JL 2000-07-09: Test for trace on and trace off from file.
+
+Testing Command Line Options:
+
+15. JL 2000-08-01: Test for mutually exclusive options -C, -P, -R, -U.
+16. JL 2000-08-01: Test that SQLRELOAD -C operates as SQLCMD.
+17. JL 2000-08-01: Test that SQLRELOAD -U operates as SQLUNLOAD.
+18. JL 2000-08-01: Test that SQLRELOAD -R operates as SQLRELOAD.
+19. JL 2000-08-01: Test that SQLUNLOAD -C operates as SQLCMD.
+20. JL 2000-08-01: Test that SQLUNLOAD -U operates as SQLUNLOAD.
+21. JL 2000-08-01: Test that SQLUNLOAD -R operates as SQLRELOAD.
+22. JL 2000-08-01: Test that SQLCMD -C operates as SQLCMD.
+23. JL 2000-08-01: Test that SQLCMD -U operates as SQLUNLOAD.
+24. JL 2000-08-01: Test that SQLCMD -R operates as SQLRELOAD.
+25. JL 2000-08-01: Test that -P option generates unimplemented message.
+
+Testing scripts:
+
+t01version.sh:
+    Print out version information, primarily for documentation purposes.
+
+t01mutexopt.sh:
+    Test the handling of mutually exclusive options
+
+t02varchar.sh:
+    Test that the handling of VARCHAR data is not causing overwrites.
+
+t03iofiles.sh:
+    *INCOMPLETE* Test the handling of input and output files.
+
+t04boolean.sh:
+    Create table with serial and boolean column
+    Load 3 valid false values, 3 valid true values, 1 null value
+    Use UNLOAD format to unload
+    Use explicit LOAD statement
+    Use RELOAD operation from command line
+
+t05lvarchar.sh:
+    Create table with serial and lvarchar column
+    Load 3 valid values, 1 null value
+    Use UNLOAD format to unload
+    Use explicit LOAD statement
+    Use RELOAD operation from command line

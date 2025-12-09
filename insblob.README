@@ -1,0 +1,33 @@
+INSBLOB - INSERT BLOBS FROM FILES INTO DATABASE
+===============================================
+
+This is an add-on to SQLCMD - you will need other source code from
+SQLCMD to compile this.  SQLCMD is obtainable from the IIUG Software
+Archive (http://www.iiug.org/software).
+
+I assume you have SQLCMD built - you really need it - and building
+SQLCMD builds libjlss.a.
+
+To compile:
+
+	esql -o insblob insblob.ec libjlss.a
+
+The insblob.test script contains a bunch of test invocations of insblob.
+
+Note the sloppy coding - INSBLOB assumes all non-blob (meaning non-BYTE,
+non-TEXT) columns can take character strings with quotes around them.
+It insists that there is at least one non-blob column in the table.
+INSBLOB treats both BYTE and TEXT blobs with SQLBYTES - works OK but is
+at least nominally sloppy.
+
+Note that there is no manual page, nor a specific makefile.  Those will
+be provided in a future release of SQLCMD.
+
+Have fun - Happy Thanksgiving for those of you in the USA.
+
+--
+Jonathan Leffler <jleffler@us.ibm.com>
+
+Date: 2002-11-21
+
+@(#)$Id: insblob.README,v 1.1 2002/11/22 01:03:51 jleffler Exp $

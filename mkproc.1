@@ -1,0 +1,43 @@
+.\" @(#)$Id: mkproc.1,v 1.2 2003/11/07 23:52:13 jleffler Exp $
+.\" @(#)Manual page: MKPROC -- Execute SQL statements in files
+.ds fC "Version: $Revision: 1.2 $ ($Date: 2003/11/07 23:52:13 $)
+.TH MKPROC 1S "JLSS UNIX Tools"
+.SH NAME
+mkproc \(em Execute SQL statements in files
+.SH SYNOPSIS
+\fBmkproc\fP [-stV] -d dbase file [...]
+.SH DESCRIPTION
+The command \fBMkproc\fP opens the given database and then
+executes the contents of each of the files specified on the
+command line using the ESQL/C CREATE PROCEDURE FROM statement.
+The statements should, therefore, not return any data, but within
+that constraint, most statements can be used.
+.P
+There is one additional constraint; objects referenced in the file must
+exist before the file is executed.
+You cannot create a table (for instance) in the file and then insert
+data into it, all in a single file.
+You will get a `table not found' error because the table does not exist
+when the statement is prepared.
+.P
+If the database has transactions, mkproc will enclose each
+statement in a transaction unless the '\*c-t\*d' flag is
+specified.
+If more than one file is specified and the '\*c-s\*d' flag is not
+mentioned, then the file names will echoed as they are executed.
+If the -V flag is specified, the version number is printed and
+the program exits successfully.
+.SH "SEE ALSO"
+sqlcmd(1)
+.SH DIAGNOSTICS
+Various, depending on SQL errors.
+Error -461 (file open error) means that the named file could not
+be found.
+.SH BUGS
+None known.
+.SH AUTHOR
+Jonathan Leffler
+.br
+JLSS
+.br
+7th November 2003

@@ -1,0 +1,258 @@
+INSTALL file for SQLCMD Version 90.02 (2016-07-28)
+
+===========================================================================
+
+Contents:
+
+* Building SQLCMD on NT
+* Building SQLCMD on Unix
+
+---------------------------------------------------------------------------
+
+Building SQLCMD on Unix
+-----------------------
+
+SQLCMD has been AutoConfiscated (hooray)!  Building SQLCMD builds all the
+other programs too.
+
+1.  Configuration: configure
+
+If this does not work for some reason, you'll need to manually edit the
+generated makefile to set the correct configuration.  Please report any
+such problems to the author.
+
+Note that if you need to add extra libraries or preprocessor directives
+(for example, to specify the location of the GNU Readline library), you
+should set the environment variables CPPFLAGS, LDFLAGS or CFLAGS before
+running configure.  For example:
+
+    CPPFLAGS="-I/usr/gnu/include" LDFLAGS="-L/usr/gnu/lib" ./configure
+
+[ Notes on 64-bit compilation ]
+
+If you are building with a 64-bit version of ESQL/C and your C compiler
+needs a special flag to make it do 64-bit compilations, then the best
+way manage this is to run the configure script with the CC environment
+variable set to the compiler of choice plus the necessary flags.  For
+example, on Solaris 8, the Sun (Forte) C compiler needs '-xarch=v9' and
+the GNU C Compiler needs '-m64'.  Hence either of these commands
+configures SQLCMD correctly:
+
+    CC="gcc -m64" ./configure
+    CC="cc -xarch=v9" ./configure
+
+Would that that were all!  Well, if you're using the Sun C compiler,
+then that is all, but if you're using GCC, you have to do some more
+work.  On Solaris 8, the 'esql' script automatically adds '-xarch=v9'
+which GCC complains about.  So, you have to copy $INFORMIXDIR/bin/esql
+to the build directory, and modify the lines which add '-xarch=v9' after
+INFORMIXC and other related environment variables.
+
+    sed -e 's/ -xarch=v9/" ; #&/' $INFORMIXDIR/bin/esql > esql
+    chmod +x esql
+
+This neuters all the material from '-xarch=v9' onwards, converting it
+into a comment.  Thus, the input line:
+
+    CC="${INFORMIXC=cc} -xarch=v9"
+
+becomes:
+
+    CC="${INFORMIXC=cc}" ; # -xarch=v9"
+
+It relies on the assignments using double quotes.  Similar rules apply
+to other platforms where you use a compiler other than the standard
+compiler for the machine -- copy the esql script from $INFORMIXDIR/bin,
+edit it, and either ensure that the current directory is on the PATH
+before $INFORMIXDIR/bin or use 'make ESQL=./esql' to pick up the local,
+edited esql script.
+
+Note that you need to be sure you have a version of GCC that is capable
+of 64-bit compilation; this would include the later GCC v3.x versions
+(possibly all of them, but the earliest version of GCC I have
+immediately on hand is v3.4.2), and GCC 4.x; it does not include GCC
+2.9x or earlier versions, in general.
+
+[ End notes on 64-bit compilation ]
+
+[ Notes on manual configuration.]
+
+Copy Makefile.in to Makefile.  Read the configuration information at the
+top of the makefile and adjust the values accordingly.  Note that strings
+such as @CPPFLAGS@ would normally be replaced with a value by the configure
+script.
+
+Note that this version of the build is more fussy about the ESQL/C
+version number than old builds were.  Make sure you are using the
+correct version number, as determined by running 'esql -V'.  Note that
+ClientSDK versions are identified as 91x (up to ClientSDK 2.10), and as
+920 for ClientSDK 2.20, 921 for ClientSDK 2.30, 930 for ClientSDK 2.40,
+and so on.  CSDK 2.90 changed the ESQL/C version number to 2.90 too (so
+the version is 290), and ClientSDK 3.00 uses ESQL/C version 3.00 (hence
+the version is 300).
+
+[ End notes on manual configuration ]
+
+[ Notes on Building without Yacc, Bison or Byacc ]
+
+This version of SQLCMD contains a small, simple YACC grammar.  If you do
+not have any variant of YACC available on your machine, you will need to
+rename the file connecty.y to old.connecty.y (for example), and the file
+connecty.c.std to connecty.c; the program should then build with no
+other changes to the makefile.
+
+You can do the renaming automatically by running 'make no-yacc' before
+running 'make' after configuration.
+
+[ End notes on Building without Yacc, Bison or Byacc ]
+
+It is known that Bison 1.14 (from January 1991) does not work; ; it is
+thought that Bison 1.16 (from January 1992) should be OK, and Bison 1.25
+and 1.28 are known to be OK.  You might get an old version of Bison to
+work if you include "-DYYBISON" in CPPFLAGS.  It is known to work with
+Byacc version 1.9, and with plain AT&T Yacc.  It does not require any
+fancy features from Yacc -- it is a simple grammar.
+
+2.  Compilation: make
+
+If it all worked, then you install the software on the local machine using
+the install instructions in step 3, but for installation on other machines,
+the the approved mechanism is described in step 4.
+
+If for some reason you want a statically linked program, use:
+
+    make USER_LDFLAGS=-static
+
+This links the static ESQL/C libraries.  You might also need to tweak
+the options some more to get statically linked system libraries.
+
+3.  Install: make install
+
+Optional.  This copies the software to the specified directory, defaulting
+to the standard locations under $INFORMIXDIR at the time of build.  Note
+that this does not allow you to uninstall the previous software, etc.  The
+system described in step 4 is more careful about such details.
+
+4.  Distribute: make BOD
+
+Optional.  This makes a Binary-Only Distribution in the sub-directory BOD.
+The contents of the sub-directory can be copied to any directory on your
+chosen target machine, and then installed (by root).  As root, you run:
+
+    jlss install sqlcmd
+
+This will copy the files from where they are to a specifiable installation
+directory (defaulting to /usr/informix).  If you don't like the default
+installation, then interrupt it and it will tell you which environment
+variables you need to set to get it to install the way you want it to.  The
+crib list is:
+
+    Base Directory: SQLCMDDIR = /usr/informix
+    Owner:          SQLCMDUSR = bin
+    Group:          SQLCMDGRP = bin
+
+    The executables   will go in SQLCMDDIR/bin
+    The documentation will go in SQLCMDDIR/man/man1
+    The other files   will go in SQLCMDDIR/etc
+
+On Linux, assuming each user has their own identically named group, I
+typically run:
+
+    ./jlss -o $LOGNAME -g $LOGNAME -d $HOME install sqlcmd
+
+You can also set environment variables SQLCMDDIR, SQLCMDUSR and SQLCMDGRP
+to override the defaults.  Command line options take precedence over the
+values from the environment.
+
+Note that with version 83.01 onwards, the default user ID and group ID
+are those of the current user.  The default install directory is still
+$INFORMIXDIR.
+
+Note too that with version 83.01 upwards, you can arrange to install a
+32-bit version of sqlcmd in the same directory as a 64-bit version by
+mapping the names of the executables using the command:
+
+    ./jlss -d $HOME -m .32 install sqlcmd
+
+===========================================================================
+
+Building SQLCMD on NT
+---------------------
+
+The good news is it probably can be done.  The bad news is that the
+configuration process is not automatic.  There is a configure.bat script
+which copies the files in the NT sub-directory to the current directory.
+However, you then need to configure the Makefile by hand.
+
+Note that the code will compile with the warning level set to /W3 /WX
+(meaning a rather high level of warning and warnings trigger errors), but
+only if the ESQL/C headers are const-correct.  By default, they are not!
+To fix this, remove or comment out the line in the ESQL/C header file
+%INFORMIXDIR%\incl\esql\sqlhdr.h that reads:
+
+#define const
+
+Alternatively, remove the /W3 /WX options from the NT version of esqlc.mk.
+
+===========================================================================
+
+The file sqlcmd-xx.yy.md5 contains the MD5 check sums of the files as
+they were distributed (with Unix-style line endings), along with the
+length of the file in bytes (and the name and the algorithm).  You can
+use any MD5 checksum generator to validate these values.
+
+===========================================================================
+
+SQLCMD v86.05 compiled using ClientSDK 3.50.UC3 and IDS 11.50.UC3 on a
+Sun E450 running Solaris 10 with GCC 4.4.2.  It has also been compiled
+on MacOS X 10.5.8 (Leopard) with ClientSDK 3.50.FC4 and IDS 11.50.FC4
+using GCC 4.0.1 (Xcode).
+
+SQLCMD v85.00 compiled using ClientSDK 3.00.UC2 and IDS 11.10.UC1 on a
+Sun E450 running Solaris 10 with GCC 4.2.1.
+
+SQLCMD v81.03 compiled using ClientSDK 2.90.UC4 and IDS 10.00.UC5 on a Sun
+Ultra SPARC running Solaris 10 with GCC 4.1.2.
+
+SQLCMD v77.01 compiled using ClientSDK 2.90.UC1 (beta) and IDS 10.00.UC1
+(nightly build) on Sun Ultra-Sparc 10 running Solaris 8 with GCC v3.4.3.
+It also compiled with G++ instead of GCC as long as the CONNECTY.c (now
+connecty.c.std) file was copied to connecty.c and connecty.y was
+renamed.  (Bison 1.875 generated code that G++ would not accept; I've
+not checked Bison 2.0, which was released circa 2005-01-04).  The
+standard configuration process used GCC (of course); the C++ build was
+done by running 'make CC="g++ -g"'.  This was without using the 'esql++'
+system that is available at the IIUG, too.
+
+SQLCMD v71.02 was compiled using ClientSDK 2.70.UC1 (ESQL/C 9.51.UC1) and
+ClientSDK 2.80.UC1 (ESQL/C 9.52.UC1) on a Sun Ultra-Sparc 10 running
+Solaris 2.7.
+
+SQLCMD v64 was compiled using ClientSDK 2.10.UC3 (ESQL/C 9.16.UC3) on a
+Pentium II 300 MHz running RedHat Linux 6.0, and using both ESQL/C 7.24.UC1
+and ClientSDK 2.40.UC1 (ESQL/C 9.30.UC1) on a Sun Ultra-Sparc 10 running
+Solaris 2.7.
+
+SQLCMD v64 compiled using ClientSDK 2.40.TC1 and IDS 7.31.TC1 on a Dell
+Latitude CP laptop (233 MHz Pentium) running Microsoft NT 4.0 SP4 using
+MSVC 5.0.
+
+===========================================================================
+
+DISCLAIMER
+----------
+
+This product is not supplied by IBM or Informix and is therefore not
+supported by IBM.  Do NOT call IBM/Informix Technical Support for help.
+To obtain help with SQLCMD, you can post a request to the news group
+comp.databases.informix (or send email to informix-list@iiug.org), but
+you can also email me directly at the address below.  Please include the
+word SQLCMD (in capitals) in the subject line of the email -- thanks!
+
+===========================================================================
+
+AUTHOR
+
+Jonathan Leffler (j.leffler@acm.org)
+
+@(#)$Id: INSTALL,v 2009.1 2009/10/23 17:31:42 jleffler Exp $

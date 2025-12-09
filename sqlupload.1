@@ -1,0 +1,262 @@
+.\" @(#)$Id: sqlupload.1,v 1.4 2001/09/10 02:37:36 jleffler Exp $
+.\" @(#)Manual page: SQLUPLOAD -- UPDATE or INSERT data from a load file
+.ds fC "Version: $Revision: 1.4 $ ($Date: 2001/09/10 02:37:36 $)
+.TH SQLUPLOAD 1S "JLSS UNIX Tools"
+.SH NAME
+\*Csqlupload\*D \(em update or insert data from a load file
+.SH SYNOPSIS
+\fBsqlupload\fP -d database -t table [-[k|K] columns] \e
+.br
+	[-H|I|S|U] [-o owner] [-u username -p password] \e
+.br
+	[-V] [-f file] [-q|v] [-s|x] [-c columns] \e
+.br
+	[-n rowspertx] [-e stopafter] [-i skipbefore] \e
+.br
+	[-r rejects] [-l logfile] \fI[-C constraints]\fP \e
+.br
+	[-D delimiter] [-e escape] [-Z debug] [file] 
+.SH DESCRIPTION
+One moderately common requirement is for a program that reads
+data from a file and, for each record, either inserts it into the
+database or updates an existing record to correspond to the data file.
+The \*Csqlupload\*D program is one answer for such requirements.
+Although it has a ferociously complex set of options, its basic
+use is very simple.
+When it is given a database name and a table name,
+\*Csqlupload\*D will read records from a file (or from standard input).
+For each such record, it will either insert the record into the
+table or update an existing record with the same values in the
+key columns.
+The options allow you to override the assumptions made by
+\*Csqlupload\*D.
+'\"
+'\" -----------------------------------------------------
+'\"
+.SH "SQLUPLOAD OPTIONS"
+The database must be specified with the `\*c-d\*d' option.
+If you connect to a database and need to supply a username and
+password, then these must both be supplied as the arguments to
+the `\*c-u\*d' and `\*c-p\*d' options respectively.
+It should be possible to specify the password other than on the
+command line because that can be examined too easily.
+The table can be specified by just the table name (`\*c-t\*d' option) or
+with the owner too (`\*c-o\*d' option).
+The owner is typically necessary only with \s-2MODE\s0 \s-2ANSI\s0 databases;
+the deciding criterion is `does \*cSELECT * FROM table\*d work?'.
+The table name is case insensitive, but the owner name is not.
+When an owner name is supplied, it is enclosed in double quotes.
+If a table in a \s-2MODE\s0 \s-2ANSI\s0 database was created with \*cCREATE TABLE
+owner.table (...)\*d, then the name in the system catalogue will be in
+upper case, so you should specify `\*c-o\*d' OWNER on the command line.
+By default, \*Csqlupload\*D assumes that the data file was created by a
+process analogous to `\*cUNLOAD TO file SELECT * FROM table\*d'.
+This means that each record in the data file contains a field for
+each column in the table.
+The table must have either a \s-2PRIMARY KEY\s0 constraint or a
+single unique index.
+The fields corresponding to the primary key or unique index
+determine whether the record must be inserted or updated.
+.P
+You can change the assumption about the sequence of the columns
+by specifying the actual columns present in the data file with
+the `\*c-c\*d' option.
+The column names are separated by commas and their sequence
+defines which the fields in the data file correspond to which
+columns in the table.
+If any columns in the table are omitted from the list, \*Csqlupload\*D
+will not be able to insert any rows unless each omitted column
+either allows nulls or has a default value defined.
+You cannot specify any column name twice; you should not try to
+specify \s-2ROWID\s0 amongst the columns, even for fragmented tables
+created \s-2WITH\s0 \s-2ROWIDS\s0.
+If the table has multiple unique indexes and no primary key, you
+must specify which fields are the key fields with the `\*c-k\*d' option.
+You can also override the default assumption if necessary.
+The `\*c-K\*d' option can be used if the columns to be used as the key
+columns do not necessarily identify a single row (i.e. if the
+columns are not a candidate key for the table).
+If the `\*c-K\*d' option is used, a single record in the data file might
+update several rows in the database, so it should be used with caution.
+All the columns listed in the key must also appear in the column
+list if the `\*c-c\*d' option is used.
+.P
+In normal operation, \*Csqlupload\*D assumes that you will not be
+changing the data in the key columns.
+You can override this, but you must use the `\*c-c\*d' option to list the
+columns in the data.
+You specify the positions of the old key values as usual, but you
+indicate the positions of the updated values by prefixing the
+name with a plus sign `+' in the column list.
+You do not have to provide updated values for every column in the key.
+Suppose you have a table with columns EventNum, EventDate, and
+Comments; the EventNum and EventDate columns form the primary
+key; and you need to update some of the EventDate values.
+You could write the `\*c-c\*d' option:
+.br
+\*c-c EventNum,EventDate,+EventDate,Comments\*d
+.br
+This would mean that there were four fields in the data file, and
+they were the event number, the original date, the (possibly
+different) new date, and a new entry for the comments about the event.
+It is not clear whether should try to insert the record and do an
+update if that fails or vice versa.
+By default, \*Csqlupload\*D uses a simple heuristic to decide which to
+try first.
+If the last N records caused more inserts than updates, then the
+new record will be inserted first; otherwise it will be updated first.
+The parameter N is a compile-time constant and defaults to 11.
+You can select this mode explicitly with the `\*c-H\*d' option.
+Alternatively, \*Csqlupload\*D will always try to insert first if you
+specify the `\*c-I\*d' option; it will always try to update first if you
+specify the `\*c-U\*d' option.
+Finally, if the `\*c-S\*d' option is used, \*Csqlupload\*D will try to select a
+record from the database before doing either an insert or an update.
+If there's a record that matches the key, it will update the
+record; if not, it will insert the record.
+Note that the `\*c-K\*d' option means that the `\*c-I\*d' option cannot be used
+because the insert might succeed when there are already rows in
+the database which match the key.
+The insert would fail, of course, if there are one or more
+candidate keys on the table and the record tries to duplicate one
+of them.
+However, \*Csqlupload\*D does not scrutinize the key structure of the
+table if either the `\*c-k\*d' or the `\*c-K\*d' options are used.
+.P
+Occasionally, there is a reason to defer the checking of certain
+constraints while the loading process continues.
+You can use the `\*c-C\*d' option to specify one or more
+constraints that should be deferred for the duration of each
+transaction.
+Typically, this means that the entire load should use just one
+transaction—see the `\*c-n\*d' option below.
+This feature is not yet implemented.
+.P
+The other options are generally simple to understand.
+The `\*c-l\*d' option specifies a log file.
+If any records are rejected, the log file will contain details
+about the record number, the contents of the record, and the
+reason why the record was rejected.
+It can be convenient to have just the rejected data saved in a
+file which, after editing, can be resubmitted to \*Csqlupload\*D.
+This file is specified by the `\*c-r\*d' option.
+.P
+The `\*c-e\*d', `\*c-i\*d', and `\*c-n\*d' options all take a
+numeric argument.
+The `\*c-e\*d' option controls how many errors are accepted
+before \*Csqlupload\*D stops; the default is to keep trying
+regardless of how many errors occur.
+The `\*c-i\*d' option indicates how many records at the beginning
+of the file should be skipped.
+If the data contains multi-line characters fields, it is not
+simple to determine how many lines in the data file correspond to
+any given number of records.
+The `\*c-n\*d' option controls how big the transaction size is.
+On an unlogged database, the option is ignored, but if the
+database is logged, then \*Csqlupload\*D automatically inserts
+transactions.
+By default, the transaction size is 1024 records.
+If the value of the `\*c-n\*d' option is zero, then a single
+large transaction is used for the entire operation.
+.P
+No table locking occurs unless either the `\*c-s\*d' or the
+`\*c-x\*d' option specifies that the table should be locked in
+shared or exclusive mode respectively.
+These options are mutually exclusive.
+The program stops if the lock cannot be applied at any time.
+.P
+Normally, \*Csqlupload\*D prints out a progress report as it
+completes each transaction.
+It is more verbose if the `\*c-v\*d' option is used.
+It prints an I for each insert, a U for each update, a C for each
+commit and an X for each rejected record, also printing a newline
+every 60 characters.
+It is quieter if the `\*c-q\*d' option is used.
+The `\*c-q\*d' and `\*c-v\*d' options are mutually exclusive.
+Normally, when an error occurs, the full text of any error
+message is written to standard error.
+The same error message will be written to the logfile (if it is
+in use) along with the record that caused the error.
+However, if the logfile is in use and either the `\*c-q\*d' or
+the `\*c-v\*d' option is specified, the error message is only
+written to the logfile.
+(Justification: with `\*c-q\*d', because it is quieter; with
+`\*c-v\*d', because it doesn't spoil the progress report).
+.P
+The `\*c-D\*d' option overrides the value of \s-2DBDELIMITER\s0 and
+specifies the character used to separate data field in the data
+file; the default is a pipe symbol `|', as usual.
+Actual occurrences of the delimiter in the data are escaped with
+an escape character, which defaults to the backslash `\e'.
+The `\*c-E\*d' option can be used to override this choice.
+The environment variable \s-2DBESCAPE\s0 can also be used to override the default.
+.P
+The `\*c-V\*d' option prints out the version number of the program and exits.
+It should normally be used on its own with no other options.
+.P
+The `\*c-Z\*d' option takes an integer argument and sets a
+debugging level.
+This is an alternative to the environment variable,
+SQLUPLOAD_DEBUGLEVEL, and the command line option overrides the
+environment variable.
+If the program was not compiled with debugging enabled, it has no
+useful effect.
+'\"
+'\" -----------------------------------------------------
+'\"
+.SH "REJECT FILE FORMAT"
+The contents of the reject file alternates between a line
+containing a record number followed by a colon and the record
+which was rejected.
+The record is a single line in simple cases, but if the data
+record itself contains newlines, then the data will extend over
+several (possibly many) lines.
+'\"
+'\" -----------------------------------------------------
+'\"
+.SH "LOG FILE FORMAT"
+The contents of the log file consists of the best error
+information that is available, followed by the information that
+would appear in the reject file.
+Typically only one error will be reported for a given record,
+even if there are several errors in it.  
+'\"
+'\" -----------------------------------------------------
+'\"
+.SH "UNLOAD FORMAT"
+Informix uses a standard data format for data that is loaded or unloaded.
+This is documented in some detail in the file \*cunload.format\*d which
+should be available with this software.
+'\"
+'\" -----------------------------------------------------
+'\"
+.SH EXAMPLES
+To be supplied.
+'\"
+'\" -----------------------------------------------------
+'\"
+.SH FILES
+'\"
+'\" -----------------------------------------------------
+'\"
+.SH "SEE ALSO"
+SQLCMD(1), DBLDFMT(1), various Informix reference manuals.
+'\"
+'\" -----------------------------------------------------
+'\"
+.SH BUGS
+Surely not?
+.P
+The `\*c-p\*d' option is problematic because specifying the password on
+the command line is insecure.
+However, what are the alternatives?
+Maybe an environment variable should be used instead?
+'\"
+'\" -----------------------------------------------------
+'\"
+.SH AUTHOR
+Jonathan Leffler
+.br
+JLSS
+.br
+17th April 1998

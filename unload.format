@@ -1,0 +1,141 @@
+Informix UNLOAD Format
+======================
+
+Informix uses a standard format for the textual representation of data
+unloaded from a database which is colloquially known as 'UNLOAD format'
+or 'LOAD format'.  This format is used by the commands ISQL, DB-Access,
+DB-Import, and DB-Export, and by the programming languages I4GL and
+NewEra, and by other tools too.  The format definition has been quite
+(but not completely) stable for a long time.  This document attempts to
+document the UNLOAD format.
+
+Basic Features
+--------------
+
+In the simplest cases, each line of data in the file represents a single
+record from the database.  The line consists of one field for each value
+in the record, with the fields being separated by a delimiter.  The
+value of each field is the character representation of the value in the
+field in the database.  The lengths of the fields can vary from record
+to record.  The last field in the record may optionally be followed by a
+delimiter.
+
+Complex Features
+----------------
+
+The default field delimiter is the pipe symbol '|'.  The delimiter can
+be specified by the environment variable DBDELIMITER.  It can also be
+specified as part of the UNLOAD statement syntax (which overrides the
+value in DBDELIMITER).  The delimiter cannot be set to a hexadecimal
+digit [0-9a-fA-F] or to the newline or backslash characters.  It is not
+a good idea to use dash (aka hyphen or minus) as the delimiter; negative
+values in numeric data are not handled correctly.  Similarly, it is not
+sensible to use the decimal point character (dot by default, but comma
+in many parts of Europe) as DBDELIMITER because the standard programs do
+not escape all possible occurrences of the delimiter.
+
+If a (character) field contains an actual occurrence of the delimiter,
+it is escaped with a backslash; if a field contains an occurrence of a
+backslash, it is also escaped with a backslash; and if a field contains
+a newline character, that is escaped with a backslash too.  Normally
+this only affects the CHAR, VARCHAR, NCHAR, NVARCHAR and TEXT fields,
+but with obscure delimiters (such as dot, slash, colon, minus or space),
+it would affect other data types too.  During a LOAD operation, a
+backslash followed by any character other than another backslash, a
+newline or a delimiter is ignored - backslash X is treated as the same
+as X.
+
+A TEXT field is treated as a giant-size character field, typically with
+newline characters in it.  A BYTE field is encoded as a continuous
+stream of hex digits, with each pair representing the character code for
+a single character in the BYTE value.  Thus, the UNLOAD format occupies
+twice as much space as the BYTE value occupies on disk in the database.
+
+Normally, trailing blanks are omitted from CHAR and NCHAR fields (but
+not from VARCHAR, NVARCHAR or TEXT fields).  A null field is represented
+by zero bytes of data followed by a delimiter.  If a CHAR or NCHAR field
+is not null but is all blank, the unload format uses a single blank to
+repesent this; the extra padding blanks will be inserted by the engine
+when the data is inserted.
+
+In general, the value of a field corresponds to the representation of a
+literal value for the same type.  One exception is for the DATETIME and
+INTERVAL types where the keywords which surround the numeric literal are
+not required.  The other is for the TEXT and BYTE fields, because there
+are no literals for these types.  There are subtle differences between
+the literal string which you would write for a character field and the
+value in unloaded data; the value in the unloaded data is not enclosed
+in quotes so embedded quotes do not need special treatment, but any
+backslashes in the value do need special treatment.
+
+It is technically possible to insert an empty string into a VARCHAR
+field which is not a null value using:
+
+    CREATE TABLE SomeTable(VarCharCol VARCHAR(20) NOT NULL);
+    INSERT INTO SomeTable(VarCharCol) VALUES ('');
+
+Without using some subterfuge, it is not possible to distinguish between
+a null VARCHAR and an empty VARCHAR in the UNLOAD format.  The chosen
+subterfuge adopted by later versions of DB-Access (7.3x, 9.2x, etc) is to
+encode such a field as backslash space (only).  This has no other useful
+meaning because a space never needs a backslash escape in a LOAD format
+file.  If the sequence backslash space appears anywhere else in a LOAD
+file, the result is a single space -- the only time it is treated
+specially is when the character sequence is the sole contents of the
+field and the column is a VARCHAR; then that field contains an empty
+non-null string.
+
+The treatment of the last field delimiter has changed subtly over time
+(in part as escaped newlines were added), but it is now [2001] difficult
+to be sure about which versions of Informix had which behaviours.  Prior
+to release 4.00, the final delimiter was either not allowed or was
+optional; the standard commands did not include it and adding the
+delimiter was never tested.  With release 4.00, the final delimiter was
+made mandatory, mainly because the format was modified to handle
+multi-line character fields.  [Judging from the code in RDSQL, the
+ancestor of SQLCMD, the UNLOAD format for multiline data did not use any
+backslashes to protect the end of line, and the final delimiter was
+mandatory to mark the end of the (multiline) field.  The final version
+of the RDSQL code was made in December 1991.  At that time, the latest
+version of ESQL/C was an early 5.0x (probably 5.01 or 5.02).  Escaped
+newline support was added to SQLCMD in December 1992.]  At some point
+after 4.00 was released, the final delimiter was made optional again,
+though the standard UNLOAD commands still include that delimiter.  The
+7.2x versions allow the optional final delimiter; it is not known which
+earlier versions also allow it.
+
+Later versions of DB-Access (7.3x, 9.2x, etc) support the -X option.
+Under this option, the output format for characters 0x00..0x1F and 0x7F
+is \xy where xy is the (lower-case) hexadecimal code for the character.
+Characters 0x80..0xFF are not modified.  During input, any sequence \xy
+is accepted when xy is a hexadecimal code.
+
+BLOB and CLOB format
+
+BLOB and CLOB data can be loaded from files.  Entries can take either of
+two forms:
+
+    /tmp/cn_1027.gif
+    63,9a,/tmp/catalog.des
+
+In the context of a ROW, the notation has also been seen inside quotes,
+which are necessary because otherwise the commas would confuse the
+parsing of the data.
+
+ROW('0,3d78,blob8386.d99','Baseball Glove')|0,62,clob8386.d9a|
+
+The first form loads the named file in its entirety; the second format
+loads data from the given offset (hex) and for the given length (also
+hex) from the named file.  One moral: do not create file names that
+could be confused with the other format.
+
+DB-Access appears to create one file for each BLOB or CLOB (see the
+example above), concatenating each blob into the file and recording
+start offset and length in the UNLOAD data file.  It is not clear what,
+if anything, triggers a switch to new tables.
+
+------------------------------------------------------------------------
+
+Jonathan Leffler (j.leffler@acm.org)
+
+$Id: unload.format,v 1.4 2008/05/26 05:51:56 jleffler Exp $
