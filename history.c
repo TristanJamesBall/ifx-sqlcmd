@@ -78,6 +78,8 @@
 #include <string.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <fcntl.h>
+#include <unistd.h>
 
 #include "filelock.h"
 #include "emalloc.h"
@@ -344,9 +346,12 @@ const char *hist_file(void)
 static void hist_defaultfile(void)
 {
     const char *name;
-
-    if ((name = getenv(SQLCMD_HISTENV)) == NIL(const char *))
+	if ((name = getenv(SQLCMD_HISTENV)) == NIL(const char *)
+        || strstr(name, "..") != NULL
+        || strchr(name, '/') != NULL
+        || strchr(name, '\\') != NULL) {
         name = SQLCMD_HISTFILE;
+	}
     hist_setfile(name);
 }
 
@@ -545,11 +550,18 @@ Sint4 hist_open(HistOpenMode mode)
         hist_defaultfile();
 
     h_file = fopen(h_name, ((mode == H_READONLY) ? "rb" : "r+b"));
-    if (h_file == NIL(FILE *) && mode != H_READONLY)
-        h_file = fopen(h_name, "w+b");
-    if (h_file == NIL(FILE *))
-        return(H_CANTOPEN);
-
+    if (h_file == NIL(FILE *) && mode != H_READONLY) {
+        int fd = open(h_name, O_RDWR | O_CREAT | O_EXCL, S_IRUSR | S_IWUSR);
+        if (fd >= 0)
+        {
+            h_file = fdopen(fd, "w+b");
+            if (h_file == NIL(FILE *))
+            {
+                close(fd);
+                return(H_CANTOPEN);
+            }
+        }
+    }
     h_lock = (mode == H_READONLY) ? FLK_READLOCK : FLK_WRITELOCK;
     if ((rc1 = flk_waitlock(h_file, h_lock)) != 0)
     {
@@ -873,18 +885,21 @@ static void hist_shrink(int newsize)
 
     /* Copy temp file over truncated old file */
     fclose(o_file);
-    if ((o_file = fopen(h_name, "w+b")) == NIL(FILE *))
-    {
-        /* Should be able to re-open file. */
-        /* Since we can't, shut down history */
-        h_file = NIL(FILE *);
-        FREE(t_used);
-        FREE(t_free);
-        FREE(o_used);
-        FREE(o_free);
-        fclose(t_file);
-        return;
-    }
+	int ofd = open(h_name, O_RDWR | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR);
+	if (ofd < 0 || (o_file = fdopen(ofd, "w+b")) == NIL(FILE *))
+	{
+		if (ofd >= 0)
+			close(ofd);
+		/* Should be able to re-open file. */
+		/* Since we can't, shut down history */
+		h_file = NIL(FILE *);
+		FREE(t_used);
+		FREE(t_free);
+		FREE(o_used);
+		FREE(o_free);
+		fclose(t_file);
+		return;
+	}
     fseek(t_file, 0L, SEEK_SET);
     fcopy(t_file, o_file);
 

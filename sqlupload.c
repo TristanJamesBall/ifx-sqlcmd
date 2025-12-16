@@ -586,7 +586,7 @@ static void print_connection(FILE *fp, const ConnInfo *conn)
     if (conn->username)
         fprintf(fp, "username: %s\n", conn->username);
     if (conn->password)
-        fprintf(fp, "password: %s\n", conn->password);
+        fprintf(fp, "password: %s\n", "** hidden **");
 }
 
 /* Describe what we're going to do */

@@ -328,8 +328,12 @@ static Time now(void)
 static char *err_time(int flags, char *buffer, size_t buflen)
 {
     Time clk = now();
-    struct tm *tp = localtime(&clk.tv_sec);
-    size_t nb = strftime(buffer, buflen, tm_format, tp);
+    struct tm tp; 
+    size_t nb;
+
+	
+	localtime_r(&clk.tv_sec,&tp);
+	nb = strftime(buffer, buflen, tm_format, &tp);
     if (flags & (ERR_NANO | ERR_MICRO | ERR_MILLI))
     {
         char subsec[12];

@@ -22,7 +22,9 @@ const char jlss_id_estrdup_c[] = "@(#)$Id: estrdup.c,v 5.7 2015/06/02 03:05:40 j
 char *estrdup(char const *s)
 {
     const char *src = s ? s : "";
-    char *dst = (char *)MALLOC(strlen(src) + 1);    /*=C++=*/
-    strcpy(dst, src);
+	int len = strlen(src);
+    char *dst = (char *)MALLOC(len + 1);    /*=C++=*/
+	memcpy(dst, src, len);
+	dst[len]='\0';
     return(dst);
 }

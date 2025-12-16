@@ -166,7 +166,6 @@ static const char *const op_list[] =
     op_xml,
     op_html,
     op_block,
-	op_markdown
 };
 
 #ifndef lint
@@ -323,7 +322,7 @@ static void ctxt_stack(Stack *s, Operator op, const char *m)
     case OP_FIXSEP:
     case OP_QUOTE:
     case OP_CSV:
-    case OP_MARKDOWN:
+	case OP_MARKDOWN:
     case OP_XML:
     case OP_HTML:
     case OP_BLOCK:
@@ -480,8 +479,8 @@ void ctxt_init(void)
     context[0].xmlrecsettag = STRDUP("sqlcmd_record_set");
     context[0].xmlheadertag = STRDUP("header");
 
-    strcpy(context[0].eor, ctxt_envstr("DBNEWLINE", "\n"));
-
+    strncpy(context[0].eor, ctxt_envstr("DBNEWLINE", "\n"),MAX_EOR - 1);
+	
     ctxt_initstack(&context[0].format, OP_SELECT);
     ctxt_initstack(&context[0].heading, OP_OFF);
     ctxt_initstack(&context[0].history, OP_OFF);

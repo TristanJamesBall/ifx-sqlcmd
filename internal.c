@@ -287,13 +287,13 @@ const char jlss_id_internal_c[] = "@(#)$Id: internal.c,v 2014.1 2014/07/28 03:05
 static void pr_time(FILE *fp)
 {
     time_t     now;
-    struct tm *tp;
+    struct tm  tp;
     char       buffer[64];
     static const char tm_format[] = "%Y-%m-%d %H:%M:%S\n";
 
     now = time((time_t *)0);
-    tp = localtime(&now);
-    strftime(buffer, sizeof(buffer), tm_format, tp);
+    localtime_r(&now,&tp);
+    strftime(buffer, sizeof(buffer), tm_format, &tp);
     fputs(buffer, fp);
 }
 
@@ -303,8 +303,9 @@ static void pr_time(FILE *fp)
 */
 static const char *mangle_username_and_password(const char *s)
 {
-    KLUDGE("Should reparse and mangle user name and password");
+	KLUDGE("Should reparse and mangle user name and password");
     return(s);
+
 }
 
 /* Record command in history log file */
@@ -313,8 +314,11 @@ static void hist_record(const char *s, int flags)
     long        cmdnum;
     const char *t = s;
 
-    if (flags & ICMD_MANGLE)
-        t = mangle_username_and_password(s);
+	/* not supported yet */
+    if (flags & ICMD_MANGLE) {
+		return;
+	}
+    /*    t = mangle_username_and_password(s); */
 
     if ((cmdnum = hist_write(t)) >= 0)
     {
