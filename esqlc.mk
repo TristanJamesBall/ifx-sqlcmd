@@ -7,7 +7,7 @@
 AR       = ar
 ARFLAGS  = rv
 RM       = rm -f
-ESQL     = INFORMIXC="${CC} -v -static -O3" ${ESQL_CMD} 
+ESQL     = INFORMIXC="${CC} -O3" ${ESQL_CMD} 
 ESQL_CMD = esql 
 EFLAGS   =
 

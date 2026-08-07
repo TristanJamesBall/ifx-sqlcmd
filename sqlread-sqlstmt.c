@@ -1,3 +1,4 @@
+#include <stddef.h>
 #include <sqlhdr.h>
 #include <sqliapi.h>
 static const char _Cn2[] = "c_statement";

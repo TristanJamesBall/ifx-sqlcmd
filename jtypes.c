@@ -32,7 +32,7 @@ const char jlss_id_jtypes_c[] = "@(#)$Id: jtypes.c,v 2008.1 2008/03/09 03:09:10 
 int             jtypmsize(int type, int len)
 {
 	int    size;
-	err_remark("jtypes: type:%d  %d\n",type,type  & ~SQLDISTINCT);
+/*	err_remark("jtypes: type:%d  %d\n",type,type  & ~SQLDISTINCT); */
 	switch (type  & ~SQLDISTINCT )
 	{
 

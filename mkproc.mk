@@ -2,7 +2,7 @@
 #
 #	Makefile for MKPROC command
 
-CC        = gcc -static
+CC        = gcc 
 XFLAGS    = -Wall -Wshadow -Wstrict-prototypes -Wmissing-prototypes
 
 #XFLAGS    =

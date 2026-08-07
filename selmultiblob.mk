@@ -15,17 +15,17 @@ include esqlc.mk
 OFLAGS        = -O
 CC            = gcc
 ESQLC_COMMAND = esql
-ESQLC_VERSION = 450
-ESQLC_VERTEXT = IBM Informix CSDK Version 4.50, IBM Informix-ESQL Version 4.50.FC11
-ESQLC_INCLDIR = /opt/ifx.sdk.450.fc11//incl/esql
+ESQLC_VERSION = 150
+ESQLC_VERTEXT = IBM Informix CSDK Version 15.0, IBM Informix-ESQL Version 15.0.1.0
+ESQLC_INCLDIR = /home/ec2-user/csdk/incl/esql
 ESQLC_AIXLOCT = 
-INFORMIXDIR   = /opt/ifx.sdk.450.fc11/
+INFORMIXDIR   = /home/ec2-user/csdk
 HAVE_CONFIG_H = -DHAVE_CONFIG_H
 RANLIB        = ranlib
 OFILES.o      = 
 LIBS	      = 
 USER_CPPFLAGS = 
-USER_CFLAGS   = -static -O3
+USER_CFLAGS   = -static
 USER_LDFLAGS  = -static
 
 UFLAGS    = # User flags for C compiler; always overridable on command line
