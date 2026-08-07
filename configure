@@ -4643,7 +4643,7 @@ $as_echo_n "checking for 32-bit vs 64-bit ESQL/C... " >&6; }
             T)  ESQLC_BITS=32;;
             U)  ESQLC_BITS=32;;
             F)  ESQLC_BITS=64;;
-            *)  as_fn_error $? "Number of bits not determinable from $esql -V ($esqlb) -- $esql_output" "$LINENO" 5;;
+            *)  ESQLC_BITS=64;;
             esac
                         if test $ESQLC_BITS = 32
             then
